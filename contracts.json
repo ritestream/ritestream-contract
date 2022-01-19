@@ -1,4 +1,7 @@
 {
-  "kovan": { },
-  "localhost": { } 
+  "kovan": {},
+  "localhost": {},
+  "binance": {
+    "tokenUpgradeable": "0xA283F5c916bCd82b953020124e2e38dAb430DE10"
+  }
 }

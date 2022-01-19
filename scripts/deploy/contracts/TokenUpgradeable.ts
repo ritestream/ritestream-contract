@@ -1,4 +1,5 @@
-import { deployProxy, upgradeProxy } from "../utils";
+import { deployProxy, upgradeProxy, verifyOnEtherscan } from "../utils";
+import { getImplementationAddress } from "@openzeppelin/upgrades-core";
 
 export const contractNames = () => ["token-upgradeable"];
 
@@ -20,6 +21,15 @@ export const deploy = async (deployer, setAddresses) => {
     `deployed TokenUpgradeable to address ${tokenUpgradeable.address}`
   );
   setAddresses({ tokenUpgradeable: tokenUpgradeable.address });
+
+  const verifyAddress = await getImplementationAddress(
+    deployer.provider,
+    tokenUpgradeable.address
+  );
+
+  console.log(`verifying TokenUpgradeable on Etherscan ${verifyAddress}`);
+  await verifyOnEtherscan(verifyAddress, constructorArguments());
+
   return tokenUpgradeable;
 };
 
