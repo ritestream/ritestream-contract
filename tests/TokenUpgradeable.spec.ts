@@ -13,7 +13,7 @@ describe("ERC20 Token Upgradeable", () => {
     deployer = (await ethers.getSigners())[0];
     token = await deployProxy(
       "TokenUpgradeable",
-      ["Token", "TKN", 18],
+      ["Ritestream Token", "RITE", 18],
       deployer,
       1
     );
@@ -27,7 +27,7 @@ describe("ERC20 Token Upgradeable", () => {
       value: ethers.utils.parseEther("1")
     });
   });
-  
+
   it("Should return the correct decimal count", async () => {
     expect(await token.decimals()).to.equal(18);
   });
@@ -58,8 +58,9 @@ describe("ERC20 Token Upgradeable", () => {
     // Assert that all protected functions revert when called from an user.
     for (let ownerFunction of ownerFunctions) {
       try {
-        await expect(ownerFunction())
-          .to.be.revertedWith("Ownable: caller is not the owner");
+        await expect(ownerFunction()).to.be.revertedWith(
+          "Ownable: caller is not the owner"
+        );
       } catch (error) {
         // the solidity-coverage plugin is not smart enough to run the
         // "revertedWith" unit test, so we account for that here.
