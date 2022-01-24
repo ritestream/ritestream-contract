@@ -16,8 +16,8 @@ contract Vault is Ownable {
         RITE = _RITE;
     }
 
-    event Deposited(address indexed from, uint256 amount, uint256 depositTime);
-    event Withdrawn(address indexed to, uint256 amount, uint256 withdrawTime);
+    event Deposited(address indexed from, uint256 amount);
+    event Withdrawn(address indexed to, uint256 amount);
 
     //Deposit RITE token from user address into vault
     function userDeposit(address from, uint256 amount) external onlyOwner {
@@ -26,7 +26,7 @@ contract Vault is Ownable {
 
         ERC20(RITE).safeTransferFrom(from, self, amount);
 
-        emit Deposited(from, amount, block.timestamp);
+        emit Deposited(from, amount);
     }
 
     //Withdraw RITE token from vault to user address
@@ -37,7 +37,7 @@ contract Vault is Ownable {
 
         ERC20(RITE).safeTransfer(to, amount);
 
-        emit Withdrawn(to, amount, block.timestamp);
+        emit Withdrawn(to, amount);
     }
 
     function getBalance() internal view returns (uint256) {
