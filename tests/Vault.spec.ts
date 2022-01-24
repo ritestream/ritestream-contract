@@ -60,6 +60,9 @@ describe("Vault Contract", () => {
     const event = getEventData("Deposited", vault, tx);
     expect(event.from).to.equal(userAddress);
     expect(event.amount).to.equal("1000000000000000000000000");
+
+    const newContractBalance = await token.balanceOf(vault.address);
+    expect(newContractBalance).to.equal("2000000000000000000000000");
   });
 
   it("Should not allow user to withdraw", async () => {
