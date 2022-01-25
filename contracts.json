@@ -2,6 +2,7 @@
   "kovan": {},
   "localhost": {},
   "binance": {
-    "tokenUpgradeable": "0xA283F5c916bCd82b953020124e2e38dAb430DE10"
+    "tokenUpgradeable": "0xA283F5c916bCd82b953020124e2e38dAb430DE10",
+    "vault": "0xa3A0Ce9592fE2bfA378Cc4dD5aB24Be150f00029"
   }
 }
