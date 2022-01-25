@@ -2,7 +2,6 @@ import { ethers } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
 import { getEventData, getRevertMessage } from "./utils";
-import { deployProxy, deployContract } from "../scripts/deploy/utils";
 
 let token: tsEthers.Contract;
 let vault: tsEthers.Contract;
@@ -13,12 +12,9 @@ describe("Vault Contract", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];
-    token = await deployProxy(
-      "TokenUpgradeable",
-      ["Ritestream Token", "RITE", 18],
-      deployer,
-      1
-    );
+    token = await (
+      await ethers.getContractFactory("Token")
+    ).deploy("Ritestream Token", "RITE", 18);
 
     vault = await (
       await ethers.getContractFactory("Vault")
@@ -48,12 +44,41 @@ describe("Vault Contract", () => {
     }
   });
 
+  it("User should sign approve message", async () => {
+    const userAddress = await user.getAddress();
+    const tx = await token
+      .connect(user)
+      .getMessageHash(userAddress, vault.address, "1000000000000000000000000");
+    const signature = await user.signMessage(tx);
+    expect(tx).not.equal(undefined);
+    expect(signature).not.equal(undefined);
+  });
+
+  it("Should allow owner to set users allowance with signature", async () => {
+    const userAddress = await user.getAddress();
+    const messageHash = await token
+      .connect(user)
+      .getMessageHash(userAddress, vault.address, "1000000000000000000000000");
+    const signature = await user.signMessage(
+      ethers.utils.arrayify(messageHash)
+    );
+
+    await token.setAllowanceWithSignature(
+      userAddress,
+      vault.address,
+      "1000000000000000000000000",
+      ethers.utils.arrayify(signature)
+    );
+
+    const userAfterAllowance = await token
+      .connect(user)
+      .allowance(userAddress, vault.address);
+
+    expect(userAfterAllowance).to.equal("1000000000000000000000000");
+  });
+
   it("Should allow owner to deposit and get deposited event", async () => {
     const userAddress = await user.getAddress();
-
-    await token
-      .connect(user)
-      .approve(vault.address, "1000000000000000000000000");
     const tx = await (
       await vault.userDeposit(userAddress, "1000000000000000000000000")
     ).wait(1);
