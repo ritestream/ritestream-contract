@@ -69,8 +69,8 @@ contract MultiVesting is Ownable {
     /// @param _share - share of tokens to be vested
     /// @param _revocable - if true, then vestors share can be revoked
     function addVestor(address _beneficiary, uint256 _share, bool _revocable) external onlyOwner {
-        require(_share > 0);
-        require(totalVestedTokens + _share <= totalAvailableTokens);
+        require(_share > 0, "Share must be greater than 0");
+        require(totalVestedTokens + _share <= totalAvailableTokens, "The contract doesn't have enough tokens to add this vestor");
         vestors[_beneficiary] = Vestor(
             _share,
             0,
@@ -131,6 +131,10 @@ contract MultiVesting is Ownable {
         }
     }
 
+    function getShare(address beneficiary) public view returns (uint256) {
+        return vestors[beneficiary].share;
+    }
+
     function getStart() public view returns (uint256) {
         return start;
     }
@@ -141,5 +145,17 @@ contract MultiVesting is Ownable {
 
     function getDuration() public view returns (uint256) {
         return duration;
+    }
+
+    function getVestingPeriod() public view returns (uint256) {
+        return vestingPeriod;
+    }
+
+    function getTotalAvailableTokens() public view returns (uint256) {
+        return totalAvailableTokens;
+    }
+
+    function getTotalVestedTokens() public view returns (uint256) {
+        return totalVestedTokens;
     }
 }

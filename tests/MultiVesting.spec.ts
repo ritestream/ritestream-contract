@@ -83,8 +83,14 @@ describe("Vault Contract", () => {
     expect(balance).to.equal(ethers.BigNumber.from("10"));
   });
 
-  it("Should allow claiming existing claimable after revoke", async () => {
+  it("Should return the unvested tokens from a vestor after revoke", async () => {
+    const vestedTokens = await vesting.getTotalVestedTokens();
     await vesting.connect(deployer).revokeVestor(user1.address);
+    const newVestedTokens = await vesting.getTotalVestedTokens();
+    expect(newVestedTokens).to.equal(vestedTokens.sub(ethers.BigNumber.from("60")));
+  });
+
+  it("Should allow claiming existing claimable after revoke", async () => {
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("10"));
   });
