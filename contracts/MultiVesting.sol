@@ -41,14 +41,13 @@ contract MultiVesting is Ownable {
         uint256[] memory _shares,
         bool[] memory _revocable
     ) {
-        require(_vestors.length == _shares.length);
-        require(_vestors.length == _revocable.length);
+        require(_vestors.length == _shares.length, "Vestor and share arrays must be the same length");
+        require(_vestors.length == _revocable.length, "Vestor and revocable arrays must be the same length");
         totalVestedTokens = 0;
         totalAvailableTokens = _totalAvailableTokens;
         for (uint256 i = 0; i < _vestors.length; i++) {
-            require(_shares[i] > 0);
-            require(_revocable[i] == true || _revocable[i] == false);
-            require(totalVestedTokens + _shares[i] <= _totalAvailableTokens);
+            require(_shares[i] > 0, "Vesting share must be greater than 0");
+            require(totalVestedTokens + _shares[i] <= _totalAvailableTokens, "Vesting shares must not exceed total available tokens");
             vestors[_vestors[i]] = Vestor(
                 _shares[i],
                 0,
@@ -92,14 +91,14 @@ contract MultiVesting is Ownable {
 
     /// Transfers vested tokens to beneficiary.
     function release() public {
-        require(block.timestamp >= cliff);
+        require(block.timestamp >= cliff, "Cliff is not over");
         _releaseTo(msg.sender, msg.sender);
     }
 
     /// Transfers vested tokens to a target address.
     /// target the address to send the tokens to
     function releaseTo(address target) public {
-        require(block.timestamp >= cliff);
+        require(block.timestamp >= cliff, "Cliff is not over");
         _releaseTo(msg.sender, target);
     }
 
