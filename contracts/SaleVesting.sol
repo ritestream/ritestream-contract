@@ -91,7 +91,7 @@ contract SaleVesting is Ownable {
 
     function claim() public {
         require(
-            block.timestamp >= TGEDate,
+            TGEDate > 0 && block.timestamp >= TGEDate,
             "Claim is not allowed before TGE start"
         );
         require(
