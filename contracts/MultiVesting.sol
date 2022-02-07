@@ -55,7 +55,7 @@ contract MultiVesting is Ownable {
                 _revocable[i],
                 false
             );
-            totalVestedTokens += _shares[i];
+            totalVestedTokens = totalVestedTokens.add(_shares[i]);
         }
         start = _start;
         cliff = _cliff;
@@ -84,7 +84,7 @@ contract MultiVesting is Ownable {
     /// @param _beneficiary - address of the vestor to be removed.
     function revokeVestor(address _beneficiary) public onlyOwner {
         require(vestors[_beneficiary].revocable, "Vestor is not revocable");
-        totalVestedTokens = totalVestedTokens.add(vestors[_beneficiary].share.sub(vestedAmount(_beneficiary)));
+        totalVestedTokens = totalVestedTokens.sub(vestors[_beneficiary].share.sub(vestedAmount(_beneficiary)));
         vestors[_beneficiary].share = vestedAmount(_beneficiary);
         vestors[_beneficiary].revoked = true;
         emit Revoked(_beneficiary);
