@@ -34,3 +34,16 @@ export const getRevertMessage = (error) => {
     ? error.substring(error.indexOf("'") + 1, error.length - 1)
     : error;
 };
+
+export const createTestUser = async (deployer) => {
+  var address = "";
+  while (address.length < 64) {
+    address = Math.floor(Math.random()*10) + address;
+  }
+  const user = new ethers.Wallet(
+    `0x${address}`,
+    deployer.provider
+  );
+  await deployer.sendTransaction({to: user.address, value: ethers.utils.parseEther("10"),});
+  return user;
+}
