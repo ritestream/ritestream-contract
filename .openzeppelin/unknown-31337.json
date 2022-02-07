@@ -20,12 +20,17 @@
       "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
       "txHash": "0x91449deb8681216716b6785d2d56b20a178ef2d52fc0a84a516f5ce7e14c9f8e",
       "kind": "uups"
+    },
+    {
+      "address": "0x9A676e781A523b5d0C0e43731313A708CB607508",
+      "txHash": "0xd60b65903659a077535ad41f986ca232982cb42ef6d7fd9ddd1afb6ffa36c775",
+      "kind": "uups"
     }
   ],
   "impls": {
     "f08d8fb0668a7cfcf784e2d8bac63c68e5541dbc92b2d2adf04d981e71f49a98": {
-      "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-      "txHash": "0x0423298e3951d3d7d177d988ae75377cbfebb865c8fbeb03464625f54409eba5",
+      "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      "txHash": "0x3ad9a79f1b9e6b5527e3fd64a5b1ecbb392bf271a6dd7b939fd328a8f76371b9",
       "layout": {
         "storage": [
           {

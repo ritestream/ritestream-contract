@@ -1,19 +1,21 @@
 import { ethers, network } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
-import { createTestUser } from "./utils";
+import { createTestUser, getRevertMessage } from "./utils";
 
 let token: tsEthers.Contract;
 let vesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let user1: tsEthers.Wallet;
+let user2: tsEthers.Wallet;
 
 describe("Vault Contract", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];
     user1 = await createTestUser(deployer);
+    user2 = await createTestUser(deployer);
 
     token = await (
       await ethers.getContractFactory("Token")
@@ -28,9 +30,9 @@ describe("Vault Contract", () => {
       1000*60*60*24,
       100000000000,
       token.address,
-      [user1.address],
-      [ethers.BigNumber.from("100")],
-      [true]
+      [user1.address, user2.address],
+      [ethers.BigNumber.from("100"), ethers.BigNumber.from("200")],
+      [true, false]
     );
 
     await token.mint(vesting.address, "1000000000000000000000000");
@@ -45,42 +47,69 @@ describe("Vault Contract", () => {
     await network.provider.send("evm_mine", [Date.now() + (1000*60*60)])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal("0");
+    const balance2 = await vesting.releasableAmount(user2.address);
+    expect(balance2).to.equal("0");
   });
 
   it("Should vest nothing after 23 hours 59 minutes", async () => {
     await network.provider.send("evm_mine", [Date.now() + (1000*60*60*24 - 1000)])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal("0");
+    const balance2 = await vesting.releasableAmount(user2.address);
+    expect(balance2).to.equal("0");
   });
 
   it("Should vest 10% after 1 day", async () => {
     await network.provider.send("evm_mine", [Date.now() + (1000*60*60*24 + 1000)])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("10"));
+    const balance2 = await vesting.releasableAmount(user2.address);
+    expect(balance2).to.equal(ethers.BigNumber.from("20"));
   });
 
   it("Should vest 30% after 3 days", async () => {
     await network.provider.send("evm_mine", [Date.now() + (1000*60*60*24*3 + 1000)])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("30"));
+    const balance2 = await vesting.releasableAmount(user2.address);
+    expect(balance2).to.equal(ethers.BigNumber.from("60"));
   });
 
   it("Should allow 30% claim after 3 days", async () => {
-    const userVesting = await vesting.connect(user1) 
-    await userVesting.release();
+    await vesting.connect(user1).release()
+    await vesting.connect(user2).release()
     const balance = await token.balanceOf(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("30"));
+    const balance2 = await token.balanceOf(user2.address);
+    expect(balance2).to.equal(ethers.BigNumber.from("60"));
   });
 
   it("Should reset available vesting if released", async () => {
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("0"));
+    const balance2 = await vesting.releasableAmount(user2.address);
+    expect(balance2).to.equal(ethers.BigNumber.from("0"));
   });
 
   it("Should allow more claiming after 1 day has passed", async () => {
     await network.provider.send("evm_mine", [Date.now() + (1000*60*60*24*4 + 1000)])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("10"));
+    const balance2 = await vesting.releasableAmount(user2.address);
+    expect(balance2).to.equal(ethers.BigNumber.from("20"));
+  });
+
+  it("Shouldn't allow revoking unrevokable vestors", async () => {
+    try {
+      await vesting.connect(deployer).revokeVestor(user2.address);
+      throw new Error("Allowed revoking unrevokable vestor");
+    } catch (error) {
+      const revertReason = getRevertMessage(error);
+      expect(revertReason).to.equal(
+        "Vestor is not revocable"
+      );
+    }
+    
   });
 
   it("Should return the unvested tokens from a vestor after revoke", async () => {
@@ -99,5 +128,16 @@ describe("Vault Contract", () => {
     await network.provider.send("evm_mine", [Date.now() + (1000*60*60*24*5 + 1000)])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("10"));
+  });
+
+  it("Should release full amount after 10 days", async () => {
+    await network.provider.send("evm_mine", [Date.now() + (1000*60*60*24*10 + 1000)])
+    await vesting.connect(user2).release()
+    const balance = await token.balanceOf(user2.address);
+    expect(balance).to.equal(ethers.BigNumber.from("200"));
+    const releaseable = await vesting.releasableAmount(user2.address);
+    expect(releaseable).to.equal(ethers.BigNumber.from("0"));
+    const totalVested = await vesting.vestedAmount(user2.address);
+    expect(totalVested).to.equal(ethers.BigNumber.from("200"));
   });
 });
