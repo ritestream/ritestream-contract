@@ -1,7 +1,7 @@
 import hre, { ethers } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
-import {  getRevertMessage } from "./utils";
+import { getRevertMessage } from "./utils";
 
 let token: tsEthers.Contract;
 let vesting: tsEthers.Contract;
@@ -56,7 +56,6 @@ describe("ERC20 Token", () => {
       {
         beneficiary: userAddress,
         vestingAmount: ethers.BigNumber.from("10000"),
-        cliff: 2592000, // 30 days
         duration: 31556926, //12 months
         claimedAmount: 0,
         lastClaimedTime: 0,
@@ -67,7 +66,6 @@ describe("ERC20 Token", () => {
       {
         beneficiary: user2Address,
         vestingAmount: ethers.BigNumber.from("20000"),
-        cliff: 0,
         duration: 31556926, //12 months
         claimedAmount: 0,
         lastClaimedTime: 0,

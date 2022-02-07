@@ -5,17 +5,23 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Token.sol";
-import "hardhat/console.sol";
 
 struct Vesting {
+    //Vestor address
     address beneficiary;
+    // Amount to be vested.
     uint256 vestingAmount;
-    uint256 cliff;
+    // Vesting duration, after cliff.
     uint256 duration;
+    // Amount already claimed by beneficiary.
     uint256 claimedAmount;
+    // Time at which beneficiary last claimed.
     uint256 lastClaimedTime;
+    // Initial amount to be claimed, separate and not included in vestingAmount.
     uint256 initialAmount; // still waiting for requirement to be finalized
+    // Whether the initialAmount value was claimed.
     bool initialClaimed;
+    // Time at which vesting begins.
     uint256 claimStartTime;
 }
 
@@ -34,19 +40,20 @@ contract SaleVesting is Ownable {
 
     mapping(address => Vesting) private vestings;
 
+    //Set user's vesting struct
     function setVesting(Vesting[] memory _vestings) public onlyOwner {
         require(_vestings.length > 0, "No vesting list provided");
 
         for (uint256 i = 0; i < _vestings.length; i++) {
+            address beneficiary = _vestings[i].beneficiary;
             require(
-                _vestings[i].beneficiary != owner(),
+                beneficiary != owner() && beneficiary != address(0),
                 "Beneficiary address is not valid"
             );
             require(
                 _vestings[i].vestingAmount > 0,
                 "Vesting amount is not valid"
             );
-
             require(_vestings[i].duration > 0, "Duration is not valid");
             require(
                 _vestings[i].claimedAmount == 0,
@@ -65,18 +72,13 @@ contract SaleVesting is Ownable {
                 "Initial claimed is not valid"
             );
             require(
-                _vestings[i].cliff <= TGEDate + _vestings[i].duration,
-                "Cliff is not valid"
-            );
-            require(
                 _vestings[i].claimStartTime >= TGEDate,
                 "Claim start time is not valid"
             );
 
-            vestings[_vestings[i].beneficiary] = Vesting(
-                _vestings[i].beneficiary,
+            vestings[beneficiary] = Vesting(
+                beneficiary,
                 _vestings[i].vestingAmount,
-                _vestings[i].cliff,
                 _vestings[i].duration,
                 _vestings[i].claimedAmount,
                 _vestings[i].lastClaimedTime,
@@ -100,57 +102,36 @@ contract SaleVesting is Ownable {
 
         uint256 amountToClaim = 0;
 
-        // If vesting period ended, claim all the remaining amount
+        // if initial claim is not done, claim initial amount + linear amount
         if (
-            block.timestamp >=
-            vestings[msg.sender].claimStartTime + vestings[msg.sender].duration
+            vestings[msg.sender].initialClaimed == false &&
+            vestings[msg.sender].initialAmount > 0
         ) {
-            amountToClaim =
+            amountToClaim += vestings[msg.sender].initialAmount;
+            vestings[msg.sender].initialClaimed = true;
+        }
+
+        // Check that block is after the cliff period.
+        if (block.timestamp >= vestings[msg.sender].claimStartTime) {
+            uint256 lastClaimedTime = vestings[msg.sender].lastClaimedTime;
+            if (lastClaimedTime == 0)
+                lastClaimedTime = vestings[msg.sender].claimStartTime;
+
+            amountToClaim +=
+                ((block.timestamp - lastClaimedTime) *
+                    (vestings[msg.sender].vestingAmount -
+                        vestings[msg.sender].initialAmount)) /
+                vestings[msg.sender].duration;
+
+            //In case the last claim amount it out of the total amount to be claimed
+            if (
+                amountToClaim >
                 vestings[msg.sender].vestingAmount -
-                vestings[msg.sender].claimedAmount;
-        } else {
-            // if initial claim is not done, claim initial amount + linear amount
-            if (vestings[msg.sender].initialClaimed == false) {
-                require(
-                    vestings[msg.sender].initialAmount > 0,
-                    "No initial release"
-                );
-
-                amountToClaim += vestings[msg.sender].initialAmount;
-
-                if (vestings[msg.sender].claimStartTime < block.timestamp) {
-                    if (vestings[msg.sender].lastClaimedTime == 0) {
-                        amountToClaim +=
-                            ((block.timestamp -
-                                vestings[msg.sender].claimStartTime) *
-                                (vestings[msg.sender].vestingAmount -
-                                    vestings[msg.sender].initialAmount)) /
-                            vestings[msg.sender].duration;
-                    } else {
-                        amountToClaim +=
-                            ((block.timestamp -
-                                vestings[msg.sender].lastClaimedTime) *
-                                (vestings[msg.sender].vestingAmount -
-                                    vestings[msg.sender].initialAmount)) /
-                            vestings[msg.sender].duration;
-                    }
-                }
-                vestings[msg.sender].initialClaimed = true;
-            } else {
-                // initial claim is done, only claim linear amount
-                require(
-                    block.timestamp >= vestings[msg.sender].claimStartTime,
-                    "Claiming is not allowed before cliff period"
-                );
-
-                amountToClaim +=
-                    ((block.timestamp - vestings[msg.sender].lastClaimedTime) *
-                        (
-                            (vestings[msg.sender].vestingAmount -
-                                vestings[msg.sender].initialAmount)
-                        )) /
-                    vestings[msg.sender].duration;
-            }
+                    vestings[msg.sender].claimedAmount
+            )
+                amountToClaim =
+                    vestings[msg.sender].vestingAmount -
+                    vestings[msg.sender].claimedAmount;
         }
 
         vestings[msg.sender].lastClaimedTime = block.timestamp;
