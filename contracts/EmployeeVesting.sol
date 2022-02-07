@@ -84,7 +84,47 @@ contract EmployeeVesting is Ownable {
     }
 
     function claim() public {
-        require(start != 0 && block.timestamp > start, "Vesting period has not started");
+        require(
+            start != 0 && block.timestamp > start,
+            "Vesting period has not started"
+        );
+        require(
+            _employees[msg.sender].terminated == false,
+            "Beneficiary is terminated"
+        );
+        require(
+            block.timestamp > _employees[msg.sender].claimStartTime,
+            "Claiming period has not started"
+        );
+        require(
+            _employees[msg.sender].claimedAmount <
+                _employees[msg.sender].vestingAmount,
+            "You have already claimed your vesting amount"
+        );
+
+        uint256 amountToClaim = 0;
+        uint256 lastClaimedTime = _employees[msg.sender].lastClaimedTime;
+        if (lastClaimedTime == 0)
+            lastClaimedTime = _employees[msg.sender].claimStartTime;
+
+        amountToClaim =
+            ((block.timestamp - lastClaimedTime) *
+                _employees[msg.sender].vestingAmount) /
+            _employees[msg.sender].duration;
+
+        // In case the last claim amount is greater than the remaining amount
+        if (
+            amountToClaim >
+            _employees[msg.sender].vestingAmount -
+                _employees[msg.sender].claimedAmount
+        )
+            amountToClaim =
+                _employees[msg.sender].vestingAmount -
+                _employees[msg.sender].claimedAmount;
+
+        _employees[msg.sender].claimedAmount += amountToClaim;
+        _employees[msg.sender].lastClaimedTime = block.timestamp;
+        ERC20(RITE).safeTransfer(msg.sender, amountToClaim);
     }
 
     function getEmployeeVesting(address beneficiary)
