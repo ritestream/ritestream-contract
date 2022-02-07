@@ -123,7 +123,7 @@ contract SaleVesting is Ownable {
                         vestings[msg.sender].initialAmount)) /
                 vestings[msg.sender].duration;
 
-            //In case the last claim amount it out of the total amount to be claimed
+            // In case the last claim amount is greater than the remaining amount
             if (
                 amountToClaim >
                 vestings[msg.sender].vestingAmount -
