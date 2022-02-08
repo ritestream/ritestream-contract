@@ -18,8 +18,8 @@ struct Employee {
     uint256 claimedAmount;
     // Time at which beneficiary last claimed.
     uint256 lastClaimedTime;
-    // Initial amount to be claimed, separate and not included in vestingAmount.
-    uint256 initialAmount; // still waiting for requirement to be finalized
+    // Initial amount to be claimed, included in vestingAmount.
+    uint256 initialAmount;
     // Whether the initialAmount value was claimed.
     bool initialClaimed;
     // Time at which vesting begins.
@@ -132,7 +132,7 @@ contract EmployeeVesting is Ownable {
         if (lastClaimedTime == 0)
             lastClaimedTime = employees[msg.sender].claimStartTime;
 
-        amountToClaim =
+        amountToClaim +=
             ((block.timestamp - lastClaimedTime) *
                 (employees[msg.sender].vestingAmount -
                     employees[msg.sender].initialAmount)) /
@@ -151,6 +151,8 @@ contract EmployeeVesting is Ownable {
         employees[msg.sender].claimedAmount += amountToClaim;
         employees[msg.sender].lastClaimedTime = block.timestamp;
         ERC20(RITE).safeTransfer(msg.sender, amountToClaim);
+
+        emit Claimed(msg.sender, amountToClaim);
     }
 
     function getEmployeeVesting(address beneficiary)
@@ -161,15 +163,20 @@ contract EmployeeVesting is Ownable {
         return employees[beneficiary];
     }
 
-    function TerminateNow(address _employee) public onlyOwner {
+    function terminateNow(address _employee) public onlyOwner {
         require(
             employees[_employee].terminated == false,
             "Employee is already terminated"
         );
         employees[_employee].terminated = true;
+
+        emit Terminated(_employee);
     }
 
     function setStartDate(uint256 _startDate) public onlyOwner {
         startDate = _startDate;
     }
+
+    event Terminated(address indexed beneficiary);
+    event Claimed(address indexed beneficiary, uint256 amount);
 }

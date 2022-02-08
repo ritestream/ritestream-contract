@@ -127,12 +127,64 @@ describe("Employee Vesting", () => {
   it("Should allow employee to claim initialAmount after the cliff", async () => {
     await hre.network.provider.request({
       method: "evm_setNextBlockTimestamp",
-      params: [startTime + 93312001]
+      params: [startTime + 15552001]
     });
 
     await employeeVesting.connect(employee1).claim();
     expect(await token.balanceOf(employee1.getAddress())).to.equal(
       ethers.BigNumber.from("250000")
     );
+  });
+
+  it("Should allow employee to claim daily released token", async () => {
+    await hre.network.provider.request({
+      method: "evm_setNextBlockTimestamp",
+      params: [startTime + 15552001 + 86400]
+    });
+
+    //(1500000-250000) * 86400/93312000
+    await employeeVesting.connect(employee1).claim();
+    expect(await token.balanceOf(employee1.getAddress())).to.equal(
+      ethers.BigNumber.from("250000").add(ethers.BigNumber.from("1157"))
+    );
+  });
+
+  it("Should only allow owner to terminate employee", async () => {
+    try {
+      await employeeVesting
+        .connect(employee1)
+        .terminateNow(await employee2.getAddress());
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal(
+        "Ownable: caller is not the owner"
+      );
+    }
+
+    await employeeVesting.terminateNow(await employee2.getAddress());
+
+    const employee2VestingDetail = await employeeVesting.getEmployeeVesting(
+      await employee2.getAddress()
+    );
+    expect(employee2VestingDetail.terminated).to.equal(true);
+  });
+
+  it("Should allow employee to claim rest of the token after vesting period", async () => {
+    await hre.network.provider.request({
+      method: "evm_setNextBlockTimestamp",
+      params: [startTime + 15552001 + 933120011]
+    });
+
+    await employeeVesting.connect(employee1).claim();
+    expect(await token.balanceOf(employee1.getAddress())).to.equal(
+      ethers.BigNumber.from("1500000")
+    );
+  });
+
+  it("Should not allow employee to claim token if been terminated", async () => {
+    try {
+      await employeeVesting.connect(employee2).claim();
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal("Beneficiary is terminated");
+    }
   });
 });
