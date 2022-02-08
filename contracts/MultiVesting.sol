@@ -54,7 +54,7 @@ contract MultiVesting is Ownable {
                 _revocable[i],
                 false
             );
-            totalVestedTokens = totalVestedTokens.add(_shares[i]);
+            totalVestedTokens += _shares[i];
         }
         start = _start;
         cliff = _cliff;
@@ -106,7 +106,7 @@ contract MultiVesting is Ownable {
     function _releaseTo(address beneficiary, address target) internal {
         uint256 unreleased = releasableAmount(beneficiary);
 
-        vestors[beneficiary].released = vestors[beneficiary].released.add(unreleased);
+        vestors[beneficiary].released += unreleased;
 
         token.transfer(target, unreleased);
 

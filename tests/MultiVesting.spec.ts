@@ -9,6 +9,8 @@ let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let user1: tsEthers.Wallet;
 let user2: tsEthers.Wallet;
+let user3: tsEthers.Wallet;
+let user4: tsEthers.Wallet;
 
 describe("Vault Contract", () => {
   before(async () => {
@@ -16,6 +18,8 @@ describe("Vault Contract", () => {
     user = (await ethers.getSigners())[1];
     user1 = await createTestUser(deployer);
     user2 = await createTestUser(deployer);
+    user3 = await createTestUser(deployer);
+    user4 = await createTestUser(deployer);
 
     token = await (
       await ethers.getContractFactory("Token")
@@ -28,14 +32,32 @@ describe("Vault Contract", () => {
       Math.floor(Date.now() - 1000*60*60),
       1000*60*60*24*10,
       1000*60*60*24,
-      100000000000,
+      1000,
       token.address,
       [user1.address, user2.address],
       [ethers.BigNumber.from("100"), ethers.BigNumber.from("200")],
       [true, false]
     );
 
-    await token.mint(vesting.address, "1000000000000000000000000");
+    await token.mint(vesting.address, "1000");
+  });
+
+  it("Should allow adding new vestor to contract", async () => {
+    await vesting.connect(deployer).addVestor(user3.address, ethers.BigNumber.from("700"), false);
+    const balance = await vesting.getShare(user3.address);
+    expect(balance).to.equal(ethers.BigNumber.from("700"));
+  });
+
+  it("Shouldn't allow adding new vestor to contract with share over available tokens", async () => {
+    try {
+      await vesting.connect(deployer).addVestor(user4.address, ethers.BigNumber.from("1"), false);
+      throw new Error("Allowed adding vestor with share over limit");
+    } catch (error) {
+      const revertReason = getRevertMessage(error);
+      expect(revertReason).to.equal(
+        "The contract doesn't have enough tokens to add this vestor"
+      );
+    }
   });
 
   it("Should vest nothing at the start", async () => {
@@ -109,7 +131,6 @@ describe("Vault Contract", () => {
         "Vestor is not revocable"
       );
     }
-    
   });
 
   it("Should return the unvested tokens from a vestor after revoke", async () => {
