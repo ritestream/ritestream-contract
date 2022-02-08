@@ -92,7 +92,7 @@ contract SaleVesting is Ownable {
                 _vestings[i].claimStartTime
             );
 
-            emit Vested(beneficiary, amount);
+            emit Vested(beneficiary, _vestings[i].vestingAmount);
         }
     }
 

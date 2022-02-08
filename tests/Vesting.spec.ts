@@ -8,7 +8,7 @@ let vesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let user2: tsEthers.Signer;
-const startTime = 1644282192; //Tuesday, February 8, 2022 11:03:12 AM GMT+10:00
+const startTime = 1644386158; //Wednesday, February 9, 2022 3:55:58 PM GMT+10:00
 
 describe("ERC20 Token", () => {
   before(async () => {
@@ -21,7 +21,7 @@ describe("ERC20 Token", () => {
 
     vesting = await (
       await ethers.getContractFactory("SaleVesting")
-    ).deploy(token.address);
+    ).deploy(token.address, startTime);
 
     await token.mint(vesting.address, ethers.BigNumber.from("100000"));
   });
@@ -61,7 +61,7 @@ describe("ERC20 Token", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("100"),
         initialClaimed: false,
-        claimStartTime: 1646874192 ////Tuesday, February 8, 2022 11:03:12 AM GMT+10:00 +  30days
+        claimStartTime: startTime + 2592000 ////Tuesday, February 8, 2022 11:03:12 AM GMT+10:00 +  30days
       },
       {
         beneficiary: user2Address,
@@ -71,7 +71,7 @@ describe("ERC20 Token", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("200"),
         initialClaimed: false,
-        claimStartTime: 1644282192 // Tuesday, February 8, 2022 11:03:12 AM GMT+10:00
+        claimStartTime: startTime + 2592000 // Tuesday, February 8, 2022 11:03:12 AM GMT+10:00
       }
     ];
 
@@ -142,7 +142,7 @@ describe("ERC20 Token", () => {
   it("Should allow user to claim rest of token after vesting period end", async () => {
     await hre.network.provider.request({
       method: "evm_setNextBlockTimestamp",
-      params: [1646874192 + 31556926 + 7200]
+      params: [startTime + 31556926 + 17200]
     });
 
     await vesting.connect(user).claim();
