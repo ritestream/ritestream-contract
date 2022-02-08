@@ -113,7 +113,7 @@ describe("ERC20 Token", () => {
     await vesting.connect(user2).claim();
     const user2BalanceAfter = await token.balanceOf(user2.getAddress());
 
-    expect(user2BalanceAfter).to.equal(ethers.BigNumber.from("204"));
+    expect(user2BalanceAfter).to.equal(ethers.BigNumber.from("200"));
   });
 
   it("Should not allow user to claim linear before cliff", async () => {
