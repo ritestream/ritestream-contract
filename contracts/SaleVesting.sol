@@ -17,7 +17,7 @@ struct Vesting {
     uint256 claimedAmount;
     // Time at which beneficiary last claimed.
     uint256 lastClaimedTime;
-    // Initial amount to be claimed, separate and not included in vestingAmount.
+    // Initial amount to be claimed, included in vestingAmount.
     uint256 initialAmount; // still waiting for requirement to be finalized
     // Whether the initialAmount value was claimed.
     bool initialClaimed;
