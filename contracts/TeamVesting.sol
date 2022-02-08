@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Token.sol";
-import "hardhat/console.sol";
 
 struct Employee {
     //Vestor address
@@ -28,22 +27,23 @@ struct Employee {
     bool terminated;
 }
 
-contract EmployeeVesting is Ownable {
+contract TeamVesting is Ownable {
     using SafeERC20 for ERC20;
 
     address public immutable self;
     address public immutable RITE;
     uint256 public startDate;
 
-    constructor(address _RITE) {
+    constructor(address _RITE, uint256 _startDate) public {
         self = address(this);
         RITE = _RITE;
+        startDate = _startDate;
     }
 
     // Employee List
     mapping(address => Employee) public employees;
 
-    function setEmployeeVesting(Employee[] memory _employees) public onlyOwner {
+    function setTeamVesting(Employee[] memory _employees) public onlyOwner {
         require(_employees.length > 0, "No employees to set");
 
         for (uint256 i = 0; i < _employees.length; i++) {
@@ -166,7 +166,7 @@ contract EmployeeVesting is Ownable {
     function terminateNow(address _employee) public onlyOwner {
         require(
             employees[_employee].terminated == false,
-            "Employee is already terminated"
+            "Beneficiary is already terminated"
         );
         employees[_employee].terminated = true;
 
@@ -174,6 +174,7 @@ contract EmployeeVesting is Ownable {
     }
 
     function setStartDate(uint256 _startDate) public onlyOwner {
+        require(_startDate > block.timestamp, "Start date is in the past");
         startDate = _startDate;
     }
 

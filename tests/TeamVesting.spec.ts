@@ -10,7 +10,7 @@ let employee1: tsEthers.Signer;
 let employee2: tsEthers.Signer;
 const startTime = 1644362594; //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM
 
-describe("Employee Vesting", () => {
+describe("Team Vesting", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     employee1 = (await ethers.getSigners())[1];
@@ -20,8 +20,8 @@ describe("Employee Vesting", () => {
     ).deploy("Token", "TKN", 18);
 
     employeeVesting = await (
-      await ethers.getContractFactory("EmployeeVesting")
-    ).deploy(token.address);
+      await ethers.getContractFactory("TeamVesting")
+    ).deploy(token.address, startTime);
 
     await token.mint(
       employeeVesting.address,
@@ -80,14 +80,14 @@ describe("Employee Vesting", () => {
     ];
 
     try {
-      await employeeVesting.connect(employee1).setEmployeeVesting(employeeList);
+      await employeeVesting.connect(employee1).setTeamVesting(employeeList);
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
       );
     }
 
-    await employeeVesting.setEmployeeVesting(employeeList);
+    await employeeVesting.setTeamVesting(employeeList);
 
     const employee1VestingDetail = await employeeVesting.getEmployeeVesting(
       employee1Address
