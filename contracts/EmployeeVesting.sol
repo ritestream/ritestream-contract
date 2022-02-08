@@ -24,7 +24,7 @@ struct Employee {
     bool initialClaimed;
     // Time at which vesting begins.
     uint256 claimStartTime;
-    // Time at which employee left the company.
+    // Employee left the company.
     bool terminated;
 }
 
