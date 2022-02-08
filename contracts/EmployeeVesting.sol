@@ -107,7 +107,6 @@ contract EmployeeVesting is Ownable {
             employees[msg.sender].terminated == false,
             "Beneficiary is terminated"
         );
-        console.log(employees[msg.sender].claimStartTime);
         require(
             block.timestamp > employees[msg.sender].claimStartTime,
             "Claiming period has not started"
@@ -119,13 +118,24 @@ contract EmployeeVesting is Ownable {
         );
 
         uint256 amountToClaim = 0;
+
         uint256 lastClaimedTime = employees[msg.sender].lastClaimedTime;
+
+        if (
+            employees[msg.sender].initialClaimed == false &&
+            employees[msg.sender].initialAmount > 0
+        ) {
+            amountToClaim += employees[msg.sender].initialAmount;
+            employees[msg.sender].initialClaimed = true;
+        }
+
         if (lastClaimedTime == 0)
             lastClaimedTime = employees[msg.sender].claimStartTime;
 
         amountToClaim =
             ((block.timestamp - lastClaimedTime) *
-                employees[msg.sender].vestingAmount) /
+                (employees[msg.sender].vestingAmount -
+                    employees[msg.sender].initialAmount)) /
             employees[msg.sender].duration;
 
         // In case the last claim amount is greater than the remaining amount

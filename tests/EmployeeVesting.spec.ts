@@ -23,7 +23,10 @@ describe("Employee Vesting", () => {
       await ethers.getContractFactory("EmployeeVesting")
     ).deploy(token.address);
 
-    await token.mint(employeeVesting.address, ethers.BigNumber.from("100000"));
+    await token.mint(
+      employeeVesting.address,
+      ethers.BigNumber.from("10000000")
+    );
   });
 
   it("Should get rite token address and balance of rite token after vesting contract deployed", async () => {
@@ -32,7 +35,7 @@ describe("Employee Vesting", () => {
 
     const balance = await token.balanceOf(employeeVesting.address);
 
-    expect(balance).to.equal(ethers.BigNumber.from("100000"));
+    expect(balance).to.equal(ethers.BigNumber.from("10000000"));
   });
 
   it("Should only allow owner to set start time", async () => {
@@ -119,5 +122,17 @@ describe("Employee Vesting", () => {
         "Claiming period has not started"
       );
     }
+  });
+
+  it("Should allow employee to claim initialAmount after the cliff", async () => {
+    await hre.network.provider.request({
+      method: "evm_setNextBlockTimestamp",
+      params: [startTime + 93312001]
+    });
+
+    await employeeVesting.connect(employee1).claim();
+    expect(await token.balanceOf(employee1.getAddress())).to.equal(
+      ethers.BigNumber.from("250000")
+    );
   });
 });
