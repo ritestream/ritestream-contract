@@ -33,7 +33,7 @@ contract SaleVesting is Ownable {
     address public immutable RITE;
     uint256 public TGEDate;
 
-    constructor(address _RITE, uint256 _TGEDate) public {
+    constructor(address _RITE, uint256 _TGEDate) {
         self = address(this);
         RITE = _RITE;
         TGEDate = _TGEDate;
