@@ -33,9 +33,10 @@ contract SaleVesting is Ownable {
     address public immutable RITE;
     uint256 public TGEDate;
 
-    constructor(address _RITE) {
+    constructor(address _RITE, uint256 _TGEDate) public {
         self = address(this);
         RITE = _RITE;
+        TGEDate = _TGEDate;
     }
 
     mapping(address => Vesting) private vestings;
@@ -43,6 +44,10 @@ contract SaleVesting is Ownable {
     //Set user's vesting struct
     function setVesting(Vesting[] memory _vestings) public onlyOwner {
         require(_vestings.length > 0, "No vesting list provided");
+        require(
+            block.timestamp < TGEDate,
+            "TGE already finished, no more vesting"
+        );
 
         for (uint256 i = 0; i < _vestings.length; i++) {
             address beneficiary = _vestings[i].beneficiary;
@@ -86,6 +91,8 @@ contract SaleVesting is Ownable {
                 _vestings[i].initialClaimed,
                 _vestings[i].claimStartTime
             );
+
+            emit Vested(beneficiary, amount);
         }
     }
 
@@ -137,6 +144,8 @@ contract SaleVesting is Ownable {
         vestings[msg.sender].lastClaimedTime = block.timestamp;
         vestings[msg.sender].claimedAmount += amountToClaim;
         ERC20(RITE).safeTransfer(msg.sender, amountToClaim);
+
+        emit Claimed(msg.sender, amountToClaim);
     }
 
     function getUserVesting() public view returns (Vesting memory) {
@@ -147,4 +156,7 @@ contract SaleVesting is Ownable {
         require(_date > block.timestamp, "TGE date is not valid");
         TGEDate = _date;
     }
+
+    event Claimed(address indexed beneficiary, uint256 amount);
+    event Vested(address indexed beneficiary, uint256 amount);
 }
