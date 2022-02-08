@@ -10,7 +10,7 @@ let user: tsEthers.Signer;
 let user2: tsEthers.Signer;
 const startTime = 1644282192; //Tuesday, February 8, 2022 11:03:12 AM GMT+10:00
 
-describe("ERC20 Token", () => {
+xdescribe("Sale Vesting", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];

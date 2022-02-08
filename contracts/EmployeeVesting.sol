@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Token.sol";
+import "hardhat/console.sol";
 
 struct Employee {
     //Vestor address
@@ -17,6 +18,10 @@ struct Employee {
     uint256 claimedAmount;
     // Time at which beneficiary last claimed.
     uint256 lastClaimedTime;
+    // Initial amount to be claimed, separate and not included in vestingAmount.
+    uint256 initialAmount; // still waiting for requirement to be finalized
+    // Whether the initialAmount value was claimed.
+    bool initialClaimed;
     // Time at which vesting begins.
     uint256 claimStartTime;
     // Time at which employee left the company.
@@ -28,7 +33,7 @@ contract EmployeeVesting is Ownable {
 
     address public immutable self;
     address public immutable RITE;
-    uint256 public start;
+    uint256 public startDate;
 
     constructor(address _RITE) {
         self = address(this);
@@ -38,13 +43,13 @@ contract EmployeeVesting is Ownable {
     // Employee List
     mapping(address => Employee) public employees;
 
-    function setEmployeeVesting(Emplyee[] memory _employees) public onlyOwner {
+    function setEmployeeVesting(Employee[] memory _employees) public onlyOwner {
         require(_employees.length > 0, "No employees to set");
 
         for (uint256 i = 0; i < _employees.length; i++) {
             address beneficiary = _employees[i].beneficiary;
             require(
-                beneficiary != owner && beneficiary != self,
+                beneficiary != owner() && beneficiary != self,
                 "Beneficiary is not allowed to be owner or self"
             );
 
@@ -59,7 +64,7 @@ contract EmployeeVesting is Ownable {
             require(_employees[i].duration > 0, "beneficiary has no duration");
             //cliff period 6 months
             require(
-                _employees[i].claimStartTime > start + 183 days,
+                _employees[i].claimStartTime > 0,
                 "Beneficiary has no claimStartTime"
             );
             require(
@@ -70,6 +75,14 @@ contract EmployeeVesting is Ownable {
                 _employees[i].lastClaimedTime == 0,
                 "Last claimed time is not valid"
             );
+            require(
+                _employees[i].initialAmount > 0,
+                "Initial amount is not valid"
+            );
+            require(
+                _employees[i].initialClaimed == false,
+                "Initial claimed can not be true"
+            );
 
             employees[beneficiary] = Employee(
                 beneficiary,
@@ -77,6 +90,8 @@ contract EmployeeVesting is Ownable {
                 _employees[i].duration,
                 _employees[i].claimedAmount,
                 _employees[i].lastClaimedTime,
+                _employees[i].initialAmount,
+                _employees[i].initialClaimed,
                 _employees[i].claimStartTime,
                 _employees[i].terminated
             );
@@ -85,45 +100,46 @@ contract EmployeeVesting is Ownable {
 
     function claim() public {
         require(
-            start != 0 && block.timestamp > start,
+            startDate != 0 && block.timestamp > startDate,
             "Vesting period has not started"
         );
         require(
-            _employees[msg.sender].terminated == false,
+            employees[msg.sender].terminated == false,
             "Beneficiary is terminated"
         );
+        console.log(employees[msg.sender].claimStartTime);
         require(
-            block.timestamp > _employees[msg.sender].claimStartTime,
+            block.timestamp > employees[msg.sender].claimStartTime,
             "Claiming period has not started"
         );
         require(
-            _employees[msg.sender].claimedAmount <
-                _employees[msg.sender].vestingAmount,
+            employees[msg.sender].claimedAmount <
+                employees[msg.sender].vestingAmount,
             "You have already claimed your vesting amount"
         );
 
         uint256 amountToClaim = 0;
-        uint256 lastClaimedTime = _employees[msg.sender].lastClaimedTime;
+        uint256 lastClaimedTime = employees[msg.sender].lastClaimedTime;
         if (lastClaimedTime == 0)
-            lastClaimedTime = _employees[msg.sender].claimStartTime;
+            lastClaimedTime = employees[msg.sender].claimStartTime;
 
         amountToClaim =
             ((block.timestamp - lastClaimedTime) *
-                _employees[msg.sender].vestingAmount) /
-            _employees[msg.sender].duration;
+                employees[msg.sender].vestingAmount) /
+            employees[msg.sender].duration;
 
         // In case the last claim amount is greater than the remaining amount
         if (
             amountToClaim >
-            _employees[msg.sender].vestingAmount -
-                _employees[msg.sender].claimedAmount
+            employees[msg.sender].vestingAmount -
+                employees[msg.sender].claimedAmount
         )
             amountToClaim =
-                _employees[msg.sender].vestingAmount -
-                _employees[msg.sender].claimedAmount;
+                employees[msg.sender].vestingAmount -
+                employees[msg.sender].claimedAmount;
 
-        _employees[msg.sender].claimedAmount += amountToClaim;
-        _employees[msg.sender].lastClaimedTime = block.timestamp;
+        employees[msg.sender].claimedAmount += amountToClaim;
+        employees[msg.sender].lastClaimedTime = block.timestamp;
         ERC20(RITE).safeTransfer(msg.sender, amountToClaim);
     }
 
@@ -143,7 +159,7 @@ contract EmployeeVesting is Ownable {
         employees[_employee].terminated = true;
     }
 
-    function setStartDate(uint256 _start) public onlyOwner {
-        start = _start;
+    function setStartDate(uint256 _startDate) public onlyOwner {
+        startDate = _startDate;
     }
 }
