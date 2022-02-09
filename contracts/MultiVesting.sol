@@ -21,11 +21,12 @@ contract MultiVesting is Ownable {
     uint256 public totalAvailableTokens;
     uint256 public totalVestedTokens;
 
-    ERC20 public token;
+    ERC20 public immutable token;
 
     struct Vestor {
       uint256 share;
       uint256 released;
+      uint256 initialClaimable;
       bool revocable;
       bool revoked;
     }
@@ -38,23 +39,23 @@ contract MultiVesting is Ownable {
         uint256 _totalAvailableTokens,
         address _token,
         address[] memory _vestors,
-        uint256[] memory _shares,
-        bool[] memory _revocable
+        Vestor[] memory _vestorData
     ) {
-        require(_vestors.length == _shares.length, "Vestor and share arrays must be the same length");
-        require(_vestors.length == _revocable.length, "Vestor and revocable arrays must be the same length");
+        require(_vestors.length == _vestorData.length, "Vestor and share arrays must be the same length");
         totalVestedTokens = 0;
         totalAvailableTokens = _totalAvailableTokens;
         for (uint256 i = 0; i < _vestors.length; i++) {
-            require(_shares[i] > 0, "Vesting share must be greater than 0");
-            require(totalVestedTokens + _shares[i] <= _totalAvailableTokens, "Vesting shares must not exceed total available tokens");
-            vestors[_vestors[i]] = Vestor(
-                _shares[i],
-                0,
-                _revocable[i],
-                false
+            require(
+                _vestors[i] != owner() && _vestors[i] != address(this),
+                "vestor is not allowed to be owner or self"
             );
-            totalVestedTokens += _shares[i];
+            require(_vestorData[i].share > 0, "Vesting share must be greater than 0");
+            require(totalVestedTokens + _vestorData[i].share <= _totalAvailableTokens, "Vesting shares must not exceed total available tokens");
+            require(_vestorData[i].released == 0, "invalid released value for vestor");
+            require(_vestorData[i].revoked == false, "invalid revoked value for vestor");
+            require(_vestorData[i].revocable == true || _vestorData[i].revocable == false, "invalid revocable value for vestor");
+            vestors[_vestors[i]] = _vestorData[i];
+            totalVestedTokens += _vestorData[i].share;
         }
         start = _start;
         cliff = _cliff;
@@ -67,12 +68,13 @@ contract MultiVesting is Ownable {
     /// @param _beneficiary - address required to receive the tokens.
     /// @param _share - share of tokens to be vested
     /// @param _revocable - if true, then vestors share can be revoked
-    function addVestor(address _beneficiary, uint256 _share, bool _revocable) external onlyOwner {
+    function addVestor(address _beneficiary, uint256 _share, uint256 _initialClaimable, bool _revocable) external onlyOwner {
         require(_share > 0, "Share must be greater than 0");
         require(totalVestedTokens + _share <= totalAvailableTokens, "The contract doesn't have enough tokens to add this vestor");
         vestors[_beneficiary] = Vestor(
             _share,
             0,
+            _initialClaimable,
             _revocable,
             false
         );
@@ -83,7 +85,7 @@ contract MultiVesting is Ownable {
     /// @param _beneficiary - address of the vestor to be removed.
     function revokeVestor(address _beneficiary) public onlyOwner {
         require(vestors[_beneficiary].revocable, "Vestor is not revocable");
-        totalVestedTokens = totalVestedTokens.sub(vestors[_beneficiary].share.sub(vestedAmount(_beneficiary)));
+        totalVestedTokens = totalVestedTokens - vestors[_beneficiary].share + vestedAmount(_beneficiary);
         vestors[_beneficiary].share = vestedAmount(_beneficiary);
         vestors[_beneficiary].revoked = true;
         emit Revoked(_beneficiary);
@@ -105,9 +107,8 @@ contract MultiVesting is Ownable {
     /// Transfers vested tokens to beneficiary.
     function _releaseTo(address beneficiary, address target) internal {
         uint256 unreleased = releasableAmount(beneficiary);
-
         vestors[beneficiary].released += unreleased;
-
+           
         token.transfer(target, unreleased);
 
         emit Released(beneficiary, vestors[beneficiary].released);
@@ -115,23 +116,34 @@ contract MultiVesting is Ownable {
 
     /// Calculates the amount that has already vested but hasn't been released yet.
     function releasableAmount(address beneficiary) public view returns (uint256) {
-        return vestedAmount(beneficiary).sub(vestors[beneficiary].released);
+        return vestedAmount(beneficiary) - vestors[beneficiary].released;
     }
 
     /// Calculates the amount that has already vested.
     function vestedAmount(address beneficiary) public view returns (uint256) {
-
         if (block.timestamp < cliff) {
             return 0;
-        } else if (block.timestamp >= start.add(duration) || vestors[beneficiary].revoked) {
+        } else if (block.timestamp >= start + duration || vestors[beneficiary].revoked) {
             return vestors[beneficiary].share;
         } else {
-            return vestors[beneficiary].share.mul(block.timestamp.sub(start).div(vestingPeriod).mul(vestingPeriod)).div(duration);
+            return ((vestors[beneficiary].share - vestors[beneficiary].initialClaimable) * floor(block.timestamp - start, vestingPeriod) / duration) + vestors[beneficiary].initialClaimable;
         }
+    }
+
+    function floor(uint256 a, uint256 m) private pure returns (uint256 r) {
+        return a - a % m;
     }
 
     function getShare(address beneficiary) public view returns (uint256) {
         return vestors[beneficiary].share;
+    }
+
+    function getReleased(address beneficiary) public view returns (uint256) {
+        return vestors[beneficiary].released;
+    }
+
+    function getInitialClaimable(address beneficiary) public view returns (uint256) {
+        return vestors[beneficiary].initialClaimable;
     }
 
     function getStart() public view returns (uint256) {

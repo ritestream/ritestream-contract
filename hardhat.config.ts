@@ -8,6 +8,7 @@ import "hardhat-contract-sizer";
 import "./scripts/tasks";
 import "solidity-coverage";
 import { ethers } from "ethers";
+import "hardhat-gas-reporter"
 
 const defaultKey =
   "0000000000000000000000000000000000000000000000000000000000000001";

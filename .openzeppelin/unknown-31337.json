@@ -27,20 +27,50 @@
       "kind": "uups"
     },
     {
+      "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+      "txHash": "0x5250a5ffadacb97ff2fa3c005a6d702e66f8fcde2b213b417718a7a394798282",
+      "kind": "uups"
+    },
+    {
+      "address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+      "txHash": "0x4742f137de6b683ee646ae2154452fa90a805e32e1342e3dde0adc8093b59f7b",
+      "kind": "uups"
+    },
+    {
+      "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+      "txHash": "0x942638db74efd6b2ebc0b48ea2d14881c5aeac73173bcc3983a86d159d7a5d17",
+      "kind": "uups"
+    },
+    {
       "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
-      "txHash": "0x4ee9d1590a62c4e75d5db68f8a3d646d0ef03452b799a2127d906ff3d4b5bf5d",
+      "txHash": "0xf998bbf062f3d576571791fa4c38f76d0628acee2f85c810292a1f065b8e67e0",
       "kind": "uups"
     },
     {
       "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
-      "txHash": "0xed3d42b2461d88c93f9b7ceec10fbea89f67706d1ac79b0ae4b6966e58413864",
+      "txHash": "0x5ca75c0649dfbe8b8ec79d585f188fd5027811d87695bd0d160ca9ec3e661553",
+      "kind": "uups"
+    },
+    {
+      "address": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
+      "txHash": "0x3927cc3d812603b821c5ccc240b188e2c61cd48fc835d90f961d1a109747e3d0",
+      "kind": "uups"
+    },
+    {
+      "address": "0x998abeb3E57409262aE5b751f60747921B33613E",
+      "txHash": "0xf8a6f1dadf04bc30f3bfd9d66c4a9abdf982235a1d252f4203c8bb6225faf4d2",
+      "kind": "uups"
+    },
+    {
+      "address": "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
+      "txHash": "0x3fbeee149710304ec5a4916c29fedc1aca7286f856038235b7ce2b8673b95d3a",
       "kind": "uups"
     }
   ],
   "impls": {
     "f08d8fb0668a7cfcf784e2d8bac63c68e5541dbc92b2d2adf04d981e71f49a98": {
-      "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
-      "txHash": "0x7175ba6bfcef4b87155e579eb5aee6c8e8e4b6de803839b8993ea88595f959e3",
+      "address": "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc",
+      "txHash": "0xe3558eab665215f422404efa99393c26033716cc0b3dce44eef4706018254974",
       "layout": {
         "storage": [
           {
