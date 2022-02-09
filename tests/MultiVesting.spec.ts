@@ -110,7 +110,7 @@ describe("Multi User Vesting", () => {
   });
 
   it("Should vest nothing after 23 hours 59 minutes", async () => {
-    await network.provider.send("evm_mine", [now + (1000*60*60*24 - 1000)])
+    await network.provider.send("evm_mine", [now + day - 1000*60])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal("0");
     const balance2 = await vesting.releasableAmount(user2.address);
@@ -120,7 +120,7 @@ describe("Multi User Vesting", () => {
   });
 
   it("Should vest 10% after 1 day", async () => {
-    await network.provider.send("evm_mine", [now + (1000*60*60*24 + 1000)])
+    await network.provider.send("evm_mine", [now + day])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("10"));
     const balance2 = await vesting.releasableAmount(user2.address);
@@ -130,7 +130,7 @@ describe("Multi User Vesting", () => {
   });
 
   it("Should vest 30% after 3 days", async () => {
-    await network.provider.send("evm_mine", [now + (1000*60*60*24*3 + 1000)])
+    await network.provider.send("evm_mine", [now + day*3])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("30"));
     const balance2 = await vesting.releasableAmount(user2.address);
@@ -161,7 +161,7 @@ describe("Multi User Vesting", () => {
   });
 
   it("Should allow more claiming after 1 day has passed", async () => {
-    await network.provider.send("evm_mine", [now + (1000*60*60*24*4 + 1000)])
+    await network.provider.send("evm_mine", [now + day*4])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("10"));
     const balance2 = await vesting.releasableAmount(user2.address);
@@ -195,13 +195,13 @@ describe("Multi User Vesting", () => {
   });
 
   it("Shouldn't vest anymore after being revoked", async () => {
-    await network.provider.send("evm_mine", [now + (1000*60*60*24*5 + 1000)])
+    await network.provider.send("evm_mine", [now + day*5])
     const balance = await vesting.releasableAmount(user1.address);
     expect(balance).to.equal(ethers.BigNumber.from("10"));
   });
 
   it("Should release full amount after 10 days", async () => {
-    await network.provider.send("evm_mine", [now + (1000*60*60*24*10 + 1000)])
+    await network.provider.send("evm_mine", [now + day*10])
     await vesting.connect(user2).release()
     await vesting.connect(user3).release()
     const balance = await token.balanceOf(user2.address);
