@@ -12,6 +12,7 @@ let user2: tsEthers.Wallet;
 let user3: tsEthers.Wallet;
 let user4: tsEthers.Wallet;
 let now: number;
+let day: number;
 
 describe("Multi User Vesting", () => {
   before(async () => {
@@ -27,12 +28,13 @@ describe("Multi User Vesting", () => {
     ).deploy("Ritestream Token", "RITE", 18);
 
     now = Date.now();
+    day = 1000*60*60*24;
 
     vesting = await (
       await ethers.getContractFactory("MultiVesting")
     ).deploy(
       Math.floor(now),
-      Math.floor(now - 1000*60*60),
+      Math.floor(now),
       1000*60*60*24*10,
       1000*60*60*24,
       1000,
@@ -70,6 +72,19 @@ describe("Multi User Vesting", () => {
       const revertReason = getRevertMessage(error);
       expect(revertReason).to.equal(
         "The contract doesn't have enough tokens to add this vestor"
+      );
+    }
+  });
+
+  it("Should not allow claim before cliff is over", async () => {
+    await network.provider.send("evm_mine", [now - day + 1]);
+    try {
+      await vesting.connect(user1).release()
+      throw new Error("Allowed claim before cliff is over");
+    } catch (error) {
+      const revertReason = getRevertMessage(error);
+      expect(revertReason).to.equal(
+        "Cliff is not over"
       );
     }
   });

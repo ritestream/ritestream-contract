@@ -126,10 +126,13 @@ contract MultiVesting is Ownable {
         } else if (block.timestamp >= start + duration || vestors[beneficiary].revoked) {
             return vestors[beneficiary].share;
         } else {
-            return ((vestors[beneficiary].share - vestors[beneficiary].initialClaimable) * floor(block.timestamp - start, vestingPeriod) / duration) + vestors[beneficiary].initialClaimable;
+            return (
+                (vestors[beneficiary].share - vestors[beneficiary].initialClaimable) 
+                * floor(block.timestamp - start, vestingPeriod) / duration) + vestors[beneficiary].initialClaimable;
         }
     }
 
+    ///Rounds down a to the nearest multiple of m  e.g. floor(39, 10) = 30
     function floor(uint256 a, uint256 m) private pure returns (uint256 r) {
         return a - a % m;
     }
