@@ -15,7 +15,15 @@ contract Token is IERC20, ERC20, Ownable {
         uint8 decimals_
     ) ERC20(name_, symbol_) {
         _decimals = decimals_;
-        _mint(address(this), 1_000_000_000 * 1e18);
+        _mint(msg.sender, 1_000_000_000 * 1e18);
+    }
+
+    function mint(address account, uint256 amount) external onlyOwner {
+        require(
+            totalSupply() <= 1_000_000_000 * 1e18,
+            "Can only mint up to 1 billion tokens"
+        );
+        _mint(account, amount);
     }
 
     function burn(address account, uint256 amount) external onlyOwner {
