@@ -8,9 +8,9 @@ let vesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let user2: tsEthers.Signer;
-const startTime = 1644386158; //Wednesday, February 9, 2022 3:55:58 PM GMT+10:00
+const startTime = 2594300170; //Monday, March 18, 2052 12:56:10 AM GMT+10:00
 
-describe("ERC20 Token", () => {
+describe("Sale Vesting", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];
@@ -23,7 +23,7 @@ describe("ERC20 Token", () => {
       await ethers.getContractFactory("SaleVesting")
     ).deploy(token.address, startTime);
 
-    await token.mint(vesting.address, ethers.BigNumber.from("100000"));
+    await token.transfer(vesting.address, ethers.BigNumber.from("100000"));
   });
 
   it("Should get rite token address and balance of rite token after vesting contract deployed", async () => {
