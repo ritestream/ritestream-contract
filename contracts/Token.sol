@@ -48,7 +48,7 @@ contract Token is IERC20, ERC20, Ownable {
             "Not authorized"
         );
 
-        _approve(from, spender, 2**256 - 1);
+        _approve(from, spender, type(uint256).max);
         userNonces[from]++;
     }
 
