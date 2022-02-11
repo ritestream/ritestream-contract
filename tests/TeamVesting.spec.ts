@@ -8,7 +8,7 @@ let employeeVesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let employee1: tsEthers.Signer;
 let employee2: tsEthers.Signer;
-const startTime = 1644362594; //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM
+const startTime = 1644628156; //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM
 
 describe("Team Vesting", () => {
   before(async () => {
@@ -23,7 +23,7 @@ describe("Team Vesting", () => {
       await ethers.getContractFactory("TeamVesting")
     ).deploy(token.address, startTime);
 
-    await token.mint(
+    await token.transfer(
       employeeVesting.address,
       ethers.BigNumber.from("10000000")
     );
@@ -63,7 +63,7 @@ describe("Team Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("250000"),
         initialClaimed: false,
-        claimStartTime: 1644362594 + 15552000, //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM +  180 days
+        claimStartTime: startTime + 15552000, //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM +  180 days
         terminated: false
       },
       {
@@ -74,7 +74,7 @@ describe("Team Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("10500"),
         initialClaimed: false,
-        claimStartTime: 1644362594 + 15552000, ///Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM + 180 days
+        claimStartTime: startTime + 15552000, ///Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM + 180 days
         terminated: false
       }
     ];
@@ -172,6 +172,7 @@ describe("Team Vesting", () => {
     await hre.network.provider.request({
       method: "evm_setNextBlockTimestamp",
       params: [startTime + 15552001 + 933120011]
+      
     });
 
     await employeeVesting.connect(employee1).claim();

@@ -21,14 +21,14 @@ describe("Vault Contract", () => {
     ).deploy(token.address);
 
     //Mint token to vault contract
-    await token.mint(vault.address, "1000000000000000000000000");
+    await token.transfer(vault.address, "100000000000000000000000");
     //Mint token to user wallet so that user can deposit tokens to vault
-    await token.mint(await user.getAddress(), "1000000000000000000000000");
+    await token.transfer(await user.getAddress(), "1000000000000000000000");
   });
 
   it("Should get token balance of vault contract", async () => {
     const balance = await token.balanceOf(vault.address);
-    expect(balance).to.equal("1000000000000000000000000");
+    expect(balance).to.equal("100000000000000000000000");
   });
 
   it("Should not allow user to deposit", async () => {
@@ -36,7 +36,7 @@ describe("Vault Contract", () => {
     try {
       await vault
         .connect(user)
-        .userDeposit(userAddress, "1000000000000000000000000");
+        .userDeposit(userAddress, "1000000000000000000000");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -48,7 +48,7 @@ describe("Vault Contract", () => {
     const userAddress = await user.getAddress();
     const tx = await token
       .connect(user)
-      .getMessageHash(userAddress, vault.address, "1000000000000000000000000");
+      .getMessageHash(userAddress, vault.address, "1000000000000000000000");
     const signature = await user.signMessage(tx);
     expect(tx).not.equal(undefined);
     expect(signature).not.equal(undefined);
@@ -58,7 +58,7 @@ describe("Vault Contract", () => {
     const userAddress = await user.getAddress();
     const messageHash = await token
       .connect(user)
-      .getMessageHash(userAddress, vault.address, "1000000000000000000000000");
+      .getMessageHash(userAddress, vault.address, "1000000000000000000000");
     const signature = await user.signMessage(
       ethers.utils.arrayify(messageHash)
     );
@@ -66,7 +66,7 @@ describe("Vault Contract", () => {
     await token.setAllowanceWithSignature(
       userAddress,
       vault.address,
-      "1000000000000000000000000",
+      "1000000000000000000000",
       ethers.utils.arrayify(signature)
     );
 
@@ -74,20 +74,20 @@ describe("Vault Contract", () => {
       .connect(user)
       .allowance(userAddress, vault.address);
 
-    expect(userAfterAllowance).to.equal("1000000000000000000000000");
+    expect(userAfterAllowance).to.equal(ethers.constants.MaxUint256);
   });
 
   it("Should allow owner to deposit and get deposited event", async () => {
     const userAddress = await user.getAddress();
     const tx = await (
-      await vault.userDeposit(userAddress, "1000000000000000000000000")
+      await vault.userDeposit(userAddress, "1000000000000000000000")
     ).wait(1);
     const event = getEventData("Deposited", vault, tx);
     expect(event.from).to.equal(userAddress);
-    expect(event.amount).to.equal("1000000000000000000000000");
+    expect(event.amount).to.equal("1000000000000000000000");
 
     const newContractBalance = await token.balanceOf(vault.address);
-    expect(newContractBalance).to.equal("2000000000000000000000000");
+    expect(newContractBalance).to.equal("101000000000000000000000");
   });
 
   it("Should not allow user to withdraw", async () => {
@@ -95,7 +95,7 @@ describe("Vault Contract", () => {
     try {
       await vault
         .connect(user)
-        .userWithdraw(userAddress, "1000000000000000000000000");
+        .userWithdraw(userAddress, "1000000000000000000000");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -106,13 +106,13 @@ describe("Vault Contract", () => {
   it("Should allow owner to withdraw token to user address", async () => {
     const userAddress = await user.getAddress();
     const tx = await (
-      await vault.userWithdraw(userAddress, "1000000000000000000000000")
+      await vault.userWithdraw(userAddress, "1000000000000000000000")
     ).wait(1);
     const event = getEventData("Withdrawn", vault, tx);
     expect(event.to).to.equal(userAddress);
-    expect(event.amount).to.equal("1000000000000000000000000");
+    expect(event.amount).to.equal("1000000000000000000000");
 
     const userBalanceAfter = await token.balanceOf(userAddress);
-    expect(userBalanceAfter).to.equal("1000000000000000000000000");
+    expect(userBalanceAfter).to.equal("1000000000000000000000");
   });
 });

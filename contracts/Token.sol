@@ -20,7 +20,7 @@ contract Token is IERC20, ERC20, Ownable {
 
     function mint(address account, uint256 amount) external onlyOwner {
         require(
-            totalSupply() <= 1_000_000_000 * 1e18,
+            totalSupply() + amount <= 1_000_000_000 * 1e18,
             "Can only mint up to 1 billion tokens"
         );
         _mint(account, amount);

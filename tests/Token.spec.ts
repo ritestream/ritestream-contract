@@ -1,7 +1,7 @@
 ﻿import { ethers } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
-import { getEventData } from "./utils";
+import { getEventData, getRevertMessage } from "./utils";
 
 let token: tsEthers.Contract;
 let deployer: tsEthers.Signer;
@@ -23,17 +23,21 @@ describe("ERC20 Token", () => {
       value: ethers.utils.parseEther("1000")
     });
   });
-  
+
   it("Should return the correct decimal count", async () => {
     expect(await token.decimals()).to.equal(18);
   });
 
-  it("Should mint tokens to deployer", async () => {
+  it("Should not mint more than 1 billion tokens after contract deployed", async () => {
     const amount = ethers.BigNumber.from("10");
     const address = await deployer.getAddress();
-    await token.mint(address, amount);
-    const balance = await token.balanceOf(address);
-    expect(balance).to.equal(amount);
+    try {
+      await token.mint(address, amount);
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal(
+        "Can only mint up to 1 billion tokens"
+      );
+    }
   });
 
   it("Should burn tokens from deployer", async () => {
@@ -41,7 +45,9 @@ describe("ERC20 Token", () => {
     const address = await deployer.getAddress();
     await token.burn(address, amount);
     const balance = await token.balanceOf(address);
-    expect(balance).to.equal(0);
+    expect(balance).to.equal(
+      ethers.BigNumber.from("999999999999999999999999990")
+    );
   });
 
   it("Should only allow deployer to mint/burn", async () => {
@@ -54,8 +60,9 @@ describe("ERC20 Token", () => {
     // Assert that all protected functions revert when called from an user.
     for (let ownerFunction of ownerFunctions) {
       try {
-        await expect(ownerFunction())
-          .to.be.revertedWith("Ownable: caller is not the owner");
+        await expect(ownerFunction()).to.be.revertedWith(
+          "Ownable: caller is not the owner"
+        );
       } catch (error) {
         // the solidity-coverage plugin is not smart enough to run the
         // "revertedWith" unit test, so we account for that here.
