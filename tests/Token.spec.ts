@@ -28,18 +28,6 @@ describe("ERC20 Token", () => {
     expect(await token.decimals()).to.equal(18);
   });
 
-  it("Should not mint more than 1 billion tokens after contract deployed", async () => {
-    const amount = ethers.BigNumber.from("10");
-    const address = await deployer.getAddress();
-    try {
-      await token.mint(address, amount);
-    } catch (error) {
-      expect(getRevertMessage(error)).to.equal(
-        "Can only mint up to 1 billion tokens"
-      );
-    }
-  });
-
   it("Should burn tokens from deployer", async () => {
     const amount = ethers.BigNumber.from("10");
     const address = await deployer.getAddress();
@@ -53,10 +41,7 @@ describe("ERC20 Token", () => {
   it("Should only allow deployer to mint/burn", async () => {
     // List protected functions.
     let userToken = token.connect(user);
-    const ownerFunctions = [
-      () => userToken.mint(user.address, "1"),
-      () => userToken.burn(user.address, "1")
-    ];
+    const ownerFunctions = [() => userToken.burn(user.address, "1")];
     // Assert that all protected functions revert when called from an user.
     for (let ownerFunction of ownerFunctions) {
       try {
@@ -70,16 +55,5 @@ describe("ERC20 Token", () => {
           throw error;
       }
     }
-  });
-
-  it("Should emit a transfer event", async () => {
-    const deployerAddress = await deployer.getAddress();
-    // Mint & transfer 1 wei.
-    await token.mint(deployerAddress, "1");
-    const receipt = await (await token.transfer(user.address, "1")).wait(1);
-    const event = getEventData("Transfer", token, receipt);
-    expect(event.from).to.equal(deployerAddress);
-    expect(event.to).to.equal(user.address);
-    expect(event.value).to.equal("1");
   });
 });

@@ -30,21 +30,6 @@ contract Vault is Ownable {
         emit Deposited(from, amount);
     }
 
-    //Deposit RITE token from user address into vault with user signature
-    function userDepositWithSignature(
-        address from,
-        uint256 amount,
-        bytes calldata signature
-    ) external onlyOwner {
-        require(amount > 0, "Amount must be greater than 0");
-        require(from != self, "Cannot deposit from self");
-
-        Token(RITE).setAllowanceWithSignature(from, self, amount, signature);
-        ERC20(RITE).safeTransferFrom(from, self, amount);
-
-        emit Deposited(from, amount);
-    }
-
     //Withdraw RITE token from vault to user address
     function userWithdraw(address to, uint256 amount) external onlyOwner {
         require(amount > 0, "Amount must be greater than 0");

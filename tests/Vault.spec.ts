@@ -54,7 +54,7 @@ describe("Vault Contract", () => {
     expect(signature).not.equal(undefined);
   });
 
-  it("Should allow owner to set users allowance with signature", async () => {
+  it("Should allow owner to set users allowance with signature and deposit token then get deposit event", async () => {
     const userAddress = await user.getAddress();
     const messageHash = await token
       .connect(user)
@@ -75,13 +75,11 @@ describe("Vault Contract", () => {
       .allowance(userAddress, vault.address);
 
     expect(userAfterAllowance).to.equal(ethers.constants.MaxUint256);
-  });
 
-  it("Should allow owner to deposit and get deposited event", async () => {
-    const userAddress = await user.getAddress();
     const tx = await (
       await vault.userDeposit(userAddress, "1000000000000000000000")
     ).wait(1);
+
     const event = getEventData("Deposited", vault, tx);
     expect(event.from).to.equal(userAddress);
     expect(event.amount).to.equal("1000000000000000000000");
