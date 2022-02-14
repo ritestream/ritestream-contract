@@ -2,13 +2,14 @@ import hre, { ethers } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
 import { getRevertMessage } from "./utils";
+import { exists } from "fs";
 
 let token: tsEthers.Contract;
 let employeeVesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let employee1: tsEthers.Signer;
 let employee2: tsEthers.Signer;
-const startTime = 1644628156; //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM
+const startTime = 1644981206; //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM
 
 describe("Team Vesting", () => {
   before(async () => {
@@ -64,7 +65,7 @@ describe("Team Vesting", () => {
         initialAmount: ethers.BigNumber.from("250000"),
         initialClaimed: false,
         claimStartTime: startTime + 15552000, //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM +  180 days
-        terminated: false
+        terminated: true
       },
       {
         beneficiary: employee2Address,
@@ -75,7 +76,7 @@ describe("Team Vesting", () => {
         initialAmount: ethers.BigNumber.from("10500"),
         initialClaimed: false,
         claimStartTime: startTime + 15552000, ///Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM + 180 days
-        terminated: false
+        terminated: true
       }
     ];
 
@@ -89,10 +90,10 @@ describe("Team Vesting", () => {
 
     await employeeVesting.setTeamVesting(employeeList);
 
-    const employee1VestingDetail = await employeeVesting.getEmployeeVesting(
+    const employee1VestingDetail = await employeeVesting.getBeneficiaryVesting(
       employee1Address
     );
-    const employee2VestingDetail = await employeeVesting.getEmployeeVesting(
+    const employee2VestingDetail = await employeeVesting.getBeneficiaryVesting(
       employee2Address
     );
 
@@ -109,6 +110,42 @@ describe("Team Vesting", () => {
     expect(employee2VestingDetail.terminated).to.equal(false);
   });
 
+  it("Should not allow owner to set vesting if vesting already exist", async () => {
+    const employee1Address = await employee1.getAddress();
+    const employee2Address = await employee2.getAddress();
+    const employeeList = [
+      {
+        beneficiary: employee1Address,
+        vestingAmount: ethers.BigNumber.from("1500000"),
+        duration: 93312000, //36 months
+        claimedAmount: 0,
+        lastClaimedTime: 0,
+        initialAmount: ethers.BigNumber.from("250000"),
+        initialClaimed: false,
+        claimStartTime: startTime + 15552000, //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM +  180 days
+        terminated: true
+      },
+      {
+        beneficiary: employee2Address,
+        vestingAmount: ethers.BigNumber.from("625000"),
+        duration: 93312000, //36 months
+        claimedAmount: 0,
+        lastClaimedTime: 0,
+        initialAmount: ethers.BigNumber.from("10500"),
+        initialClaimed: false,
+        claimStartTime: startTime + 15552000, ///Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM + 180 days
+        terminated: true
+      }
+    ];
+
+    try {
+      await employeeVesting.setTeamVesting(employeeList);
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal(
+        "Vesting already exists for beneficiary"
+      );
+    }
+  });
   it("Should not allow employee to claim token before the cliff", async () => {
     await hre.network.provider.request({
       method: "evm_setNextBlockTimestamp",
@@ -162,7 +199,7 @@ describe("Team Vesting", () => {
 
     await employeeVesting.terminateNow(await employee2.getAddress());
 
-    const employee2VestingDetail = await employeeVesting.getEmployeeVesting(
+    const employee2VestingDetail = await employeeVesting.getBeneficiaryVesting(
       await employee2.getAddress()
     );
     expect(employee2VestingDetail.terminated).to.equal(true);
@@ -172,7 +209,6 @@ describe("Team Vesting", () => {
     await hre.network.provider.request({
       method: "evm_setNextBlockTimestamp",
       params: [startTime + 15552001 + 933120011]
-      
     });
 
     await employeeVesting.connect(employee1).claim();
@@ -185,7 +221,7 @@ describe("Team Vesting", () => {
     try {
       await employeeVesting.connect(employee2).claim();
     } catch (error) {
-      expect(getRevertMessage(error)).to.equal("Beneficiary is terminated");
+      expect(getRevertMessage(error)).to.equal("Beneficiary has terminated");
     }
   });
 });

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Token.sol";
 
-struct Vestor {
+struct VestingDetail {
     //Vestor address
     address beneficiary;
     // Amount to be vested.
@@ -23,7 +23,7 @@ struct Vestor {
     bool initialClaimed;
     // Time at which vesting begins.
     uint256 claimStartTime;
-    // Employee left the company.
+    // Terminate Beneficiary vesting.
     bool terminated;
 }
 
@@ -40,61 +40,69 @@ contract TeamVesting is Ownable {
         startDate = _startDate;
     }
 
-    // Employee List
-    mapping(address => Vestor) public vestors;
+    // Vesting detail list
+    mapping(address => VestingDetail) private vestingDetails;
+    mapping(address => bool) private vestingExists;
 
-    function setTeamVesting(Vestor[] memory _vestors) public onlyOwner {
-        require(_vestors.length > 0, "No employees to set");
+    function setTeamVesting(VestingDetail[] memory _vestingDetails)
+        public
+        onlyOwner
+    {
+        require(_vestingDetails.length > 0, "No vesting details provided");
 
-        for (uint256 i = 0; i < _vestors.length; i++) {
-            address beneficiary = _vestors[i].beneficiary;
+        for (uint256 i = 0; i < _vestingDetails.length; i++) {
+            address beneficiary = _vestingDetails[i].beneficiary;
+            require(
+                !vestingExists[beneficiary],
+                "Vesting already exists for beneficiary"
+            );
             require(
                 beneficiary != owner() && beneficiary != self,
                 "Beneficiary is not allowed to be owner or self"
             );
-
             require(
-                !_vestors[i].terminated,
-                "Beneficiary is already terminated"
-            );
-            require(
-                _vestors[i].vestingAmount > 0,
+                _vestingDetails[i].vestingAmount > 0,
                 "Beneficiary has no vesting amount"
             );
-            require(_vestors[i].duration > 0, "beneficiary has no duration");
+            require(
+                _vestingDetails[i].duration > 0,
+                "beneficiary has no duration"
+            );
             //cliff period 6 months
             require(
-                _vestors[i].claimStartTime > 0,
+                _vestingDetails[i].claimStartTime > 0,
                 "Beneficiary has no claimStartTime"
             );
             require(
-                _vestors[i].claimedAmount == 0,
+                _vestingDetails[i].claimedAmount == 0,
                 "Claimed amount is not valid"
             );
             require(
-                _vestors[i].lastClaimedTime == 0,
+                _vestingDetails[i].lastClaimedTime == 0,
                 "Last claimed time is not valid"
             );
             require(
-                _vestors[i].initialAmount > 0,
+                _vestingDetails[i].initialAmount > 0,
                 "Initial amount is not valid"
             );
             require(
-                _vestors[i].initialClaimed == false,
+                _vestingDetails[i].initialClaimed == false,
                 "Initial claimed can not be true"
             );
 
-            vestors[beneficiary] = Vestor(
+            vestingDetails[beneficiary] = VestingDetail(
                 beneficiary,
-                _vestors[i].vestingAmount,
-                _vestors[i].duration,
-                _vestors[i].claimedAmount,
-                _vestors[i].lastClaimedTime,
-                _vestors[i].initialAmount,
-                _vestors[i].initialClaimed,
-                _vestors[i].claimStartTime,
-                _vestors[i].terminated
+                _vestingDetails[i].vestingAmount,
+                _vestingDetails[i].duration,
+                _vestingDetails[i].claimedAmount,
+                _vestingDetails[i].lastClaimedTime,
+                _vestingDetails[i].initialAmount,
+                _vestingDetails[i].initialClaimed,
+                _vestingDetails[i].claimStartTime,
+                false
             );
+
+            vestingExists[beneficiary] = true;
         }
     }
 
@@ -103,72 +111,74 @@ contract TeamVesting is Ownable {
             startDate != 0 && block.timestamp > startDate,
             "Vesting period has not started"
         );
+        require(vestingExists[msg.sender] == true, "Vesting does not exist");
         require(
-            vestors[msg.sender].terminated == false,
-            "Beneficiary is terminated"
+            vestingDetails[msg.sender].terminated == false,
+            "Beneficiary has terminated"
         );
         require(
-            block.timestamp > vestors[msg.sender].claimStartTime,
+            block.timestamp > vestingDetails[msg.sender].claimStartTime,
             "Claiming period has not started"
         );
         require(
-            vestors[msg.sender].claimedAmount <
-                vestors[msg.sender].vestingAmount,
+            vestingDetails[msg.sender].claimedAmount <
+                vestingDetails[msg.sender].vestingAmount,
             "You have already claimed your vesting amount"
         );
 
         uint256 amountToClaim = 0;
 
-        uint256 lastClaimedTime = vestors[msg.sender].lastClaimedTime;
+        uint256 lastClaimedTime = vestingDetails[msg.sender].lastClaimedTime;
 
         if (
-            vestors[msg.sender].initialClaimed == false &&
-            vestors[msg.sender].initialAmount > 0
+            vestingDetails[msg.sender].initialClaimed == false &&
+            vestingDetails[msg.sender].initialAmount > 0
         ) {
-            amountToClaim += vestors[msg.sender].initialAmount;
-            vestors[msg.sender].initialClaimed = true;
+            amountToClaim += vestingDetails[msg.sender].initialAmount;
+            vestingDetails[msg.sender].initialClaimed = true;
         }
 
         if (lastClaimedTime == 0)
-            lastClaimedTime = vestors[msg.sender].claimStartTime;
+            lastClaimedTime = vestingDetails[msg.sender].claimStartTime;
 
         amountToClaim +=
             ((block.timestamp - lastClaimedTime) *
-                (vestors[msg.sender].vestingAmount -
-                    vestors[msg.sender].initialAmount)) /
-            vestors[msg.sender].duration;
+                (vestingDetails[msg.sender].vestingAmount -
+                    vestingDetails[msg.sender].initialAmount)) /
+            vestingDetails[msg.sender].duration;
 
         // In case the last claim amount is greater than the remaining amount
         if (
             amountToClaim >
-            vestors[msg.sender].vestingAmount -
-                vestors[msg.sender].claimedAmount
+            vestingDetails[msg.sender].vestingAmount -
+                vestingDetails[msg.sender].claimedAmount
         )
             amountToClaim =
-                vestors[msg.sender].vestingAmount -
-                vestors[msg.sender].claimedAmount;
+                vestingDetails[msg.sender].vestingAmount -
+                vestingDetails[msg.sender].claimedAmount;
 
-        vestors[msg.sender].claimedAmount += amountToClaim;
-        vestors[msg.sender].lastClaimedTime = block.timestamp;
+        vestingDetails[msg.sender].claimedAmount += amountToClaim;
+        vestingDetails[msg.sender].lastClaimedTime = block.timestamp;
         ERC20(RITE).safeTransfer(msg.sender, amountToClaim);
 
         emit Claimed(msg.sender, amountToClaim);
     }
 
-    function getEmployeeVesting(address beneficiary)
+    function getBeneficiaryVesting(address beneficiary)
         public
         view
-        returns (Vestor memory)
+        returns (VestingDetail memory)
     {
-        return vestors[beneficiary];
+        return vestingDetails[beneficiary];
     }
 
     function terminateNow(address beneficiary) public onlyOwner {
+        require(vestingExists[beneficiary], "Vesting does not exist");
         require(
-            vestors[beneficiary].terminated == false,
+            vestingDetails[beneficiary].terminated == false,
             "Beneficiary is already terminated"
         );
-        vestors[beneficiary].terminated = true;
+        vestingDetails[beneficiary].terminated = true;
 
         emit Terminated(beneficiary);
     }
@@ -180,4 +190,5 @@ contract TeamVesting is Ownable {
 
     event Terminated(address indexed beneficiary);
     event Claimed(address indexed beneficiary, uint256 amount);
+    event Vested(address indexed beneficiary, uint256 amount);
 }

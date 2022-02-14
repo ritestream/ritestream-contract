@@ -40,6 +40,7 @@ contract SaleVesting is Ownable {
     }
 
     mapping(address => Vesting) private vestings;
+    mapping(address => bool) private vestingExists;
 
     //Set user's vesting struct
     function setVesting(Vesting[] memory _vestings) public onlyOwner {
@@ -51,6 +52,7 @@ contract SaleVesting is Ownable {
 
         for (uint256 i = 0; i < _vestings.length; i++) {
             address beneficiary = _vestings[i].beneficiary;
+            require(!vestingExists[beneficiary], "Vesting already exists");
             require(
                 beneficiary != owner() && beneficiary != address(0),
                 "Beneficiary address is not valid"
@@ -92,6 +94,7 @@ contract SaleVesting is Ownable {
                 _vestings[i].claimStartTime
             );
 
+            vestingExists[beneficiary] = true;
             emit Vested(beneficiary, _vestings[i].vestingAmount);
         }
     }
@@ -101,6 +104,7 @@ contract SaleVesting is Ownable {
             TGEDate > 0 && block.timestamp >= TGEDate,
             "Claim is not allowed before TGE start"
         );
+        require(vestingExists[msg.sender], "Vesting does not exist");
         require(
             vestings[msg.sender].claimedAmount <
                 vestings[msg.sender].vestingAmount,
@@ -148,8 +152,12 @@ contract SaleVesting is Ownable {
         emit Claimed(msg.sender, amountToClaim);
     }
 
-    function getUserVesting() public view returns (Vesting memory) {
-        return vestings[msg.sender];
+    function getBeneficiaryVesting(address _beneficiary)
+        public
+        view
+        returns (Vesting memory)
+    {
+        return vestings[_beneficiary];
     }
 
     function setTgeDate(uint256 _date) public onlyOwner {

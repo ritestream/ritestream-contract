@@ -10,7 +10,8 @@
     "hh:node": "npx hardhat node --hostname localhost",
     "test": "npx hardhat test",
     "coverage": "npx hardhat coverage",
-    "lint": "prettier --write \"./**/*.{js,sol,ts}\""
+    "lint": "prettier --write \"./**/*.{js,sol,ts}\"",
+    "initContract": "npx ts-node scripts/saleVesting.ts"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.1.6",
