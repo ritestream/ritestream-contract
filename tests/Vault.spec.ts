@@ -104,13 +104,13 @@ describe("Vault Contract", () => {
   it("Should allow owner to withdraw token to user address", async () => {
     const userAddress = await user.getAddress();
     const tx = await (
-      await vault.userWithdraw(userAddress, "1000000000000000000000")
+      await vault.userWithdraw(userAddress, ethers.BigNumber.from("1.5"))
     ).wait(1);
     const event = getEventData("Withdrawn", vault, tx);
     expect(event.to).to.equal(userAddress);
-    expect(event.amount).to.equal("1000000000000000000000");
+    expect(event.amount).to.equal(ethers.BigNumber.from("1.5"));
 
     const userBalanceAfter = await token.balanceOf(userAddress);
-    expect(userBalanceAfter).to.equal("1000000000000000000000");
+    expect(userBalanceAfter).to.equal(ethers.BigNumber.from("1.5"));
   });
 });
