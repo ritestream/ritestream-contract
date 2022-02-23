@@ -37,6 +37,7 @@ describe("Vault Contract", () => {
       await vault
         .connect(user)
         .userDeposit(userAddress, "1000000000000000000000");
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -94,6 +95,7 @@ describe("Vault Contract", () => {
       await vault
         .connect(user)
         .userWithdraw(userAddress, "1000000000000000000000");
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -104,13 +106,13 @@ describe("Vault Contract", () => {
   it("Should allow owner to withdraw token to user address", async () => {
     const userAddress = await user.getAddress();
     const tx = await (
-      await vault.userWithdraw(userAddress, ethers.BigNumber.from("1.5"))
+      await vault.userWithdraw(userAddress, ethers.BigNumber.from("1"))
     ).wait(1);
     const event = getEventData("Withdrawn", vault, tx);
     expect(event.to).to.equal(userAddress);
-    expect(event.amount).to.equal(ethers.BigNumber.from("1.5"));
+    expect(event.amount).to.equal(ethers.BigNumber.from("1"));
 
     const userBalanceAfter = await token.balanceOf(userAddress);
-    expect(userBalanceAfter).to.equal(ethers.BigNumber.from("1.5"));
+    expect(userBalanceAfter).to.equal(ethers.BigNumber.from("1"));
   });
 });

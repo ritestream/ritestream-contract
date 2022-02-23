@@ -9,7 +9,7 @@ let employeeVesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let employee1: tsEthers.Signer;
 let employee2: tsEthers.Signer;
-const startTime = 1644981206; //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM
+const startTime = Date.now();
 
 describe("Team Vesting", () => {
   before(async () => {
@@ -42,6 +42,7 @@ describe("Team Vesting", () => {
   it("Should only allow owner to set start time", async () => {
     try {
       await employeeVesting.connect(employee1).setStartDate(startTime);
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -82,6 +83,7 @@ describe("Team Vesting", () => {
 
     try {
       await employeeVesting.connect(employee1).setTeamVesting(employeeList);
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -140,6 +142,7 @@ describe("Team Vesting", () => {
 
     try {
       await employeeVesting.setTeamVesting(employeeList);
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Vesting already exists for beneficiary"
@@ -154,6 +157,7 @@ describe("Team Vesting", () => {
 
     try {
       await employeeVesting.connect(employee1).claim();
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Claiming period has not started"
@@ -191,6 +195,7 @@ describe("Team Vesting", () => {
       await employeeVesting
         .connect(employee1)
         .terminateNow(await employee2.getAddress());
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -220,6 +225,7 @@ describe("Team Vesting", () => {
   it("Should not allow employee to claim token if been terminated", async () => {
     try {
       await employeeVesting.connect(employee2).claim();
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal("Beneficiary has terminated");
     }

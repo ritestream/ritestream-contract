@@ -8,7 +8,7 @@ let vesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let user2: tsEthers.Signer;
-const startTime = 2594300170; //Monday, March 18, 2052 12:56:10 AM GMT+10:00
+const startTime = Date.now() + 1000*60*60*24*365*20; //now + 20 years
 
 describe("Sale Vesting", () => {
   before(async () => {
@@ -38,6 +38,7 @@ describe("Sale Vesting", () => {
   it("Should only allow owner to set start time", async () => {
     try {
       await vesting.connect(user).setTgeDate(startTime);
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -119,6 +120,7 @@ describe("Sale Vesting", () => {
 
     try {
       await vesting.setVesting(userVestingList);
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal("Vesting already exists");
     }
@@ -127,6 +129,7 @@ describe("Sale Vesting", () => {
   it("Should not allow to claim before TGE start", async () => {
     try {
       await vesting.connect(user).claim();
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Claim is not allowed before TGE start"
@@ -156,6 +159,7 @@ describe("Sale Vesting", () => {
   it("Should not allow user to claim linear before cliff", async () => {
     try {
       await vesting.connect(user).claim();
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Claiming is not allowed before cliff period"
