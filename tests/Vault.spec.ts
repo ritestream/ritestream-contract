@@ -75,7 +75,9 @@ describe("Vault Contract", () => {
       .connect(user)
       .allowance(userAddress, vault.address);
 
-    expect(userAfterAllowance).to.equal(ethers.constants.MaxUint256);
+    expect(userAfterAllowance).to.equal(
+      ethers.BigNumber.from("1000000000000000000000")
+    );
 
     const tx = await (
       await vault.userDeposit(userAddress, "1000000000000000000000")

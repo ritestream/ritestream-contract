@@ -8,7 +8,7 @@ let vesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let user2: tsEthers.Signer;
-const startTime = Date.now() + 1000*60*60*24*365*20; //now + 20 years
+let startTime = 0;
 
 describe("Sale Vesting", () => {
   before(async () => {
@@ -24,6 +24,12 @@ describe("Sale Vesting", () => {
     ).deploy(token.address, startTime);
 
     await token.transfer(vesting.address, ethers.BigNumber.from("100000"));
+
+    const latestBlockNumber = await ethers.provider.getBlockNumber();
+
+    const latestBlock = await ethers.provider.getBlock(latestBlockNumber);
+
+    startTime = latestBlock.timestamp + 1000;
   });
 
   it("Should get rite token address and balance of rite token after vesting contract deployed", async () => {
@@ -36,18 +42,18 @@ describe("Sale Vesting", () => {
   });
 
   it("Should only allow owner to set start time", async () => {
+    const tgeDate = startTime + 1000;
     try {
-      await vesting.connect(user).setTgeDate(startTime);
-      throw new Error("Should not reach here");
+      await vesting.connect(user).setTgeDate(tgeDate);
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
       );
     }
 
-    await vesting.setTgeDate(startTime);
+    await vesting.setTgeDate(tgeDate);
 
-    expect(await vesting.TGEDate()).to.equal(startTime);
+    expect(await vesting.TGEDate()).to.equal(tgeDate);
   });
 
   it("Should allow owner to set vesting", async () => {
@@ -62,7 +68,7 @@ describe("Sale Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("100"),
         initialClaimed: false,
-        claimStartTime: startTime + 2592000 ////Tuesday, February 8, 2022 11:03:12 AM GMT+10:00 +  30days
+        claimStartTime: startTime + 2592000
       },
       {
         beneficiary: user2Address,
@@ -72,7 +78,7 @@ describe("Sale Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("200"),
         initialClaimed: false,
-        claimStartTime: startTime + 2592000 // Tuesday, February 8, 2022 11:03:12 AM GMT+10:00
+        claimStartTime: startTime + 2592000
       }
     ];
 
