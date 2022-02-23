@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.11;
+pragma solidity 0.8.11;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Token is IERC20, ERC20, Ownable {
     uint8 private immutable _decimals;
-    mapping(address => uint256) userNonces;
+    mapping(address => uint256) internal userNonces;
 
     constructor(
         string memory name_,
@@ -18,20 +18,31 @@ contract Token is IERC20, ERC20, Ownable {
         _mint(msg.sender, 1_000_000_000 * 1e18);
     }
 
-    function burn(address account, uint256 amount) external onlyOwner {
-        _burn(account, amount);
+    /**
+     * @dev Allow owner to burn the token they own
+     * @param amount  The amount of the token user want to burn.
+     */
+    function burn(uint256 amount) external onlyOwner {
+        _burn(msg.sender, amount);
     }
 
     function decimals() public view override returns (uint8) {
         return _decimals;
     }
 
+    /**
+     * @dev Allow owner to set user's allowance with user's signature
+     * @param from  The user address.
+     * @param spender  The spender address.
+     * @param amount  The amount of the token to approve.
+     * @param signature  The signature of the message hash user signed.
+     */
     function setAllowanceWithSignature(
         address from,
         address spender,
         uint256 amount,
         bytes calldata signature
-    ) public onlyOwner {
+    ) external onlyOwner {
         bytes32 messageHash = getMessageHash(from, spender, amount);
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
@@ -40,10 +51,16 @@ contract Token is IERC20, ERC20, Ownable {
             "Not authorized"
         );
 
-        _approve(from, spender, type(uint256).max);
+        _approve(from, spender, amount);
         userNonces[from]++;
     }
 
+    /**
+     * @dev Return message hash with owner address, spender address and amount.
+     * @param owner  The user address.
+     * @param spender The spender address.
+     * @param amount The amount of tokens to be approved.
+     */
     function getMessageHash(
         address owner,
         address spender,
