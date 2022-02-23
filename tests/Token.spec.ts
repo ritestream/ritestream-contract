@@ -5,24 +5,21 @@ import { getEventData, getRevertMessage } from "./utils";
 
 let token: tsEthers.Contract;
 let deployer: tsEthers.Signer;
-let user: tsEthers.Wallet;
+let user: tsEthers.Signer;
 let otherUser: tsEthers.Signer;
 const vaultAddress = "0xa3A0Ce9592fE2bfA378Cc4dD5aB24Be150f00029"; //fake vault address for testing
 
 describe("ERC20 Token", () => {
   before(async () => {
-    deployer = (await ethers.getSigners())[0];
+    [deployer, user] = await ethers.getSigners();
     otherUser = (await ethers.getSigners())[1];
     token = await (
       await ethers.getContractFactory("Token")
     ).deploy("Token", "TKN", 18);
-    user = new ethers.Wallet(
-      "0xbeefbeefbeefbeefbeefbeefbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef",
-      deployer.provider
-    );
+
     // Send ETH to user from signer.
     await deployer.sendTransaction({
-      to: user.address,
+      to: await user.getAddress(),
       value: ethers.utils.parseEther("1000")
     });
   });
