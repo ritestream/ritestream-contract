@@ -105,7 +105,7 @@ describe("Vault Contract", () => {
     }
   });
 
-  it("Should allow owner to withdraw token to user address", async () => {
+  it("Should allow owner to withdraw token address", async () => {
     const userAddress = await user.getAddress();
     const tx = await (
       await vault.userWithdraw(userAddress, ethers.BigNumber.from("1"))
@@ -116,5 +116,24 @@ describe("Vault Contract", () => {
 
     const userBalanceAfter = await token.balanceOf(userAddress);
     expect(userBalanceAfter).to.equal(ethers.BigNumber.from("1"));
+  });
+
+  it("Should only allow owner to withdraw token from contract", async () => {
+    try {
+      await vault.connect(user).withdraw();
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal(
+        "Ownable: caller is not the owner"
+      );
+    }
+
+    const deployerAddress = await deployer.getAddress();
+    const balanceBefore = await token.balanceOf(deployerAddress);
+    const balanceOfVaultBefore = await token.balanceOf(vault.address);
+
+    await (await vault.withdraw()).wait(1);
+
+    const balanceAfter = await token.balanceOf(deployerAddress);
+    expect(balanceAfter).to.equal(balanceBefore.add(balanceOfVaultBefore));
   });
 });

@@ -153,6 +153,15 @@ describe("Sale Vesting", () => {
     const userBalanceAfter = await token.balanceOf(user.getAddress());
 
     expect(userBalanceAfter).to.equal(ethers.BigNumber.from("100"));
+
+    const userAddress = await user.getAddress();
+    const vestingDetail = await vesting
+      .connect(user)
+      .getBeneficiaryVesting(userAddress);
+
+    expect(ethers.utils.formatUnits(vestingDetail.lastClaimedTime, 0)).to.equal(
+      (startTime + 7200).toString()
+    );
   });
 
   it("Should allow user2 to claim initial amount with linear amount after TGE start", async () => {

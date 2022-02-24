@@ -60,7 +60,8 @@ contract Vault is Ownable {
 
     /// @dev Function to withdraw all tokens from vault
     function withdraw() external onlyOwner {
+        //Balance of the vault
         uint256 amount = ERC20(RITE).balanceOf(self);
-        ERC20(RITE).safeTransfer(self, amount);
+        ERC20(RITE).safeTransfer(msg.sender, amount);
     }
 }
