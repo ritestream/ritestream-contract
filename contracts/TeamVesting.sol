@@ -54,7 +54,8 @@ contract TeamVesting is Ownable {
         //At least one vesting detail is required.
         require(_vestingDetails.length > 0, "No vesting details provided");
 
-        for (uint256 i = 0; i < _vestingDetails.length; i++) {
+        uint256 count = _vestingDetails.length;
+        for (uint256 i = 0; i < count; i++) {
             address beneficiary = _vestingDetails[i].beneficiary;
             //Check if beneficiary already has a vesting
             require(

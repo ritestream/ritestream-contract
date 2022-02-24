@@ -44,14 +44,14 @@ describe("Sale Vesting", () => {
   it("Should only allow owner to set start time", async () => {
     const tgeDate = startTime + 1000;
     try {
-      await vesting.connect(user).setTgeDate(tgeDate);
+      await vesting.connect(user).setTGEDate(tgeDate);
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
       );
     }
 
-    await vesting.setTgeDate(tgeDate);
+    await vesting.setTGEDate(tgeDate);
 
     expect(await vesting.TGEDate()).to.equal(tgeDate);
   });

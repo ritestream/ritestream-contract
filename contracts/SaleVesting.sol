@@ -56,7 +56,8 @@ contract SaleVesting is Ownable {
             "TGE already finished, no more vesting"
         );
 
-        for (uint256 i = 0; i < _vestingDetails.length; i++) {
+        uint256 count = _vestingDetails.length;
+        for (uint256 i = 0; i < count; i++) {
             address beneficiary = _vestingDetails[i].beneficiary;
             require(
                 beneficiary != owner() && beneficiary != address(0),
@@ -194,7 +195,7 @@ contract SaleVesting is Ownable {
      * @dev Allow owner to set TGE date
      * @param _date  The date of the TGE
      */
-    function setTgeDate(uint256 _date) external onlyOwner {
+    function setTGEDate(uint256 _date) external onlyOwner {
         require(_date > block.timestamp, "TGE date is not valid");
         TGEDate = _date;
     }
