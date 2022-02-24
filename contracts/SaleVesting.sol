@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Token.sol";
 
-struct Vesting {
+struct VestingDetail {
     //Vestor address
     address beneficiary;
     // Amount to be vested.
@@ -39,75 +39,101 @@ contract SaleVesting is Ownable {
         TGEDate = _TGEDate;
     }
 
-    mapping(address => Vesting) private vestings;
-    mapping(address => bool) private vestingExists;
+    mapping(address => VestingDetail) internal vestingDetails;
 
-    //Set user's vesting struct
-    function setVesting(Vesting[] memory _vestings) public onlyOwner {
-        require(_vestings.length > 0, "No vesting list provided");
+    /**
+     * @dev Allow owner set user's vesting struct
+     * @param _vestingDetails A list of beneficiary's vesting.
+     */
+    function setVesting(VestingDetail[] memory _vestingDetails)
+        external
+        onlyOwner
+    {
+        //At least one vesting detail is required.
+        require(_vestingDetails.length > 0, "No vesting list provided");
         require(
             block.timestamp < TGEDate,
             "TGE already finished, no more vesting"
         );
 
-        for (uint256 i = 0; i < _vestings.length; i++) {
-            address beneficiary = _vestings[i].beneficiary;
-            require(!vestingExists[beneficiary], "Vesting already exists");
+        for (uint256 i = 0; i < _vestingDetails.length; i++) {
+            address beneficiary = _vestingDetails[i].beneficiary;
             require(
                 beneficiary != owner() && beneficiary != address(0),
                 "Beneficiary address is not valid"
             );
+            //Check if beneficiary already has a vesting
             require(
-                _vestings[i].vestingAmount > 0,
+                vestingDetails[beneficiary].vestingAmount == 0,
+                "Vesting already exists"
+            );
+            //Beneficiary's vesting amount must be great than 0
+            require(
+                _vestingDetails[i].vestingAmount > 0,
                 "Vesting amount is not valid"
             );
-            require(_vestings[i].duration > 0, "Duration is not valid");
+            //Vesting duration must be greater than 0
+            require(_vestingDetails[i].duration > 0, "Duration is not valid");
+            //New beneficiary's initial claimed amount must be 0
             require(
-                _vestings[i].claimedAmount == 0,
+                _vestingDetails[i].claimedAmount == 0,
                 "Claimed amount is not valid"
             );
+            //New beneficiary's last claimed time must be 0
             require(
-                _vestings[i].lastClaimedTime == 0,
+                _vestingDetails[i].lastClaimedTime == 0,
                 "Last claimed time is not valid"
             );
+            //New beneficiary's initial amount must be great than 0
             require(
-                _vestings[i].initialAmount > 0,
+                _vestingDetails[i].initialAmount > 0,
                 "TGE initial release amount is not valid"
             );
+            //New beneficiary's initial claimed must be false
             require(
-                _vestings[i].initialClaimed == false,
+                _vestingDetails[i].initialClaimed == false,
                 "Initial claimed is not valid"
             );
+            //New beneficiary's claim start time must be greater than TGE date
             require(
-                _vestings[i].claimStartTime >= TGEDate,
+                _vestingDetails[i].claimStartTime >= TGEDate,
                 "Claim start time is not valid"
             );
 
-            vestings[beneficiary] = Vesting(
+            vestingDetails[beneficiary] = VestingDetail(
                 beneficiary,
-                _vestings[i].vestingAmount,
-                _vestings[i].duration,
-                _vestings[i].claimedAmount,
-                _vestings[i].lastClaimedTime,
-                _vestings[i].initialAmount,
-                _vestings[i].initialClaimed,
-                _vestings[i].claimStartTime
+                _vestingDetails[i].vestingAmount,
+                _vestingDetails[i].duration,
+                _vestingDetails[i].claimedAmount,
+                _vestingDetails[i].lastClaimedTime,
+                _vestingDetails[i].initialAmount,
+                _vestingDetails[i].initialClaimed,
+                _vestingDetails[i].claimStartTime
             );
 
-            vestingExists[beneficiary] = true;
-            emit Vested(beneficiary, _vestings[i].vestingAmount);
+            emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
     }
 
-    function claim() public {
+    /**
+     * @dev Allow user to claim token from vesting after TGE.
+     */
+    function claim() external {
+        address beneficiary = msg.sender;
+        //TGE date must be greater than 0 and block timestamp must be equal or greater than TGE date
         require(
             TGEDate > 0 && block.timestamp >= TGEDate,
             "Claim is not allowed before TGE start"
         );
-        require(vestingExists[msg.sender], "Vesting does not exist");
+        //Beneficiary must have a vesting
         require(
-            vestings[msg.sender].claimedAmount <
-                vestings[msg.sender].vestingAmount,
+            vestingDetails[beneficiary].vestingAmount > 0,
+            "Vesting does not exist"
+        );
+        //Beneficiary must have not claimed all of his vesting
+        require(
+            vestingDetails[beneficiary].claimedAmount <
+                vestingDetails[beneficiary].vestingAmount,
             "You have already claimed your vesting amount"
         );
 
@@ -115,56 +141,71 @@ contract SaleVesting is Ownable {
 
         // if initial claim is not done, claim initial amount + linear amount
         if (
-            vestings[msg.sender].initialClaimed == false &&
-            vestings[msg.sender].initialAmount > 0
+            vestingDetails[beneficiary].initialClaimed == false &&
+            vestingDetails[beneficiary].initialAmount > 0
         ) {
-            amountToClaim += vestings[msg.sender].initialAmount;
-            vestings[msg.sender].initialClaimed = true;
+            amountToClaim += vestingDetails[beneficiary].initialAmount;
+            vestingDetails[beneficiary].initialClaimed = true;
         }
 
         // Check that block is after the cliff period.
-        if (block.timestamp >= vestings[msg.sender].claimStartTime) {
-            uint256 lastClaimedTime = vestings[msg.sender].lastClaimedTime;
+        if (block.timestamp >= vestingDetails[beneficiary].claimStartTime) {
+            uint256 lastClaimedTime = vestingDetails[beneficiary]
+                .lastClaimedTime;
             if (lastClaimedTime == 0)
-                lastClaimedTime = vestings[msg.sender].claimStartTime;
+                lastClaimedTime = vestingDetails[beneficiary].claimStartTime;
 
             amountToClaim +=
                 ((block.timestamp - lastClaimedTime) *
-                    (vestings[msg.sender].vestingAmount -
-                        vestings[msg.sender].initialAmount)) /
-                vestings[msg.sender].duration;
+                    (vestingDetails[beneficiary].vestingAmount -
+                        vestingDetails[beneficiary].initialAmount)) /
+                vestingDetails[beneficiary].duration;
 
             // In case the last claim amount is greater than the remaining amount
             if (
                 amountToClaim >
-                vestings[msg.sender].vestingAmount -
-                    vestings[msg.sender].claimedAmount
+                vestingDetails[beneficiary].vestingAmount -
+                    vestingDetails[beneficiary].claimedAmount
             )
                 amountToClaim =
-                    vestings[msg.sender].vestingAmount -
-                    vestings[msg.sender].claimedAmount;
+                    vestingDetails[beneficiary].vestingAmount -
+                    vestingDetails[beneficiary].claimedAmount;
         }
 
-        vestings[msg.sender].lastClaimedTime = block.timestamp;
-        vestings[msg.sender].claimedAmount += amountToClaim;
-        ERC20(RITE).safeTransfer(msg.sender, amountToClaim);
+        vestingDetails[beneficiary].lastClaimedTime = block.timestamp;
+        vestingDetails[beneficiary].claimedAmount += amountToClaim;
+        ERC20(RITE).safeTransfer(beneficiary, amountToClaim);
 
-        emit Claimed(msg.sender, amountToClaim);
+        emit Claimed(beneficiary, amountToClaim);
     }
 
+    /**
+     * @dev Get beneficiary's vesting detail
+     */
     function getBeneficiaryVesting(address _beneficiary)
-        public
+        external
         view
-        returns (Vesting memory)
+        returns (VestingDetail memory)
     {
-        return vestings[_beneficiary];
+        return vestingDetails[_beneficiary];
     }
 
-    function setTgeDate(uint256 _date) public onlyOwner {
+    /**
+     * @dev Allow owner to set TGE date
+     * @param _date  The date of the TGE
+     */
+    function setTgeDate(uint256 _date) external onlyOwner {
         require(_date > block.timestamp, "TGE date is not valid");
         TGEDate = _date;
     }
 
+    /// @dev event when beneficiary claim tokens
+    /// @param beneficiary a beneficiary address
+    /// @param amount a claimed amount
     event Claimed(address indexed beneficiary, uint256 amount);
+
+    /// @dev event when beneficiary's vesting detail been set
+    /// @param beneficiary a beneficiary address
+    /// @param amount a claimed amount
     event Vested(address indexed beneficiary, uint256 amount);
 }

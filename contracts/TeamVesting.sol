@@ -23,10 +23,11 @@ struct VestingDetail {
     bool initialClaimed;
     // Time at which vesting begins.
     uint256 claimStartTime;
-    // Terminate Beneficiary vesting.
-    bool terminated;
+    // Bool for beneficiary exist or not.
+    bool exists;
 }
 
+/// @title A vestion contract for emploees and partners.
 contract TeamVesting is Ownable {
     using SafeERC20 for ERC20;
 
@@ -37,54 +38,64 @@ contract TeamVesting is Ownable {
     constructor(address _RITE, uint256 _startDate) {
         self = address(this);
         RITE = _RITE;
+        //Vesting start date
         startDate = _startDate;
     }
 
     // Vesting detail list
-    mapping(address => VestingDetail) private vestingDetails;
-    mapping(address => bool) private vestingExists;
+    mapping(address => VestingDetail) internal vestingDetails;
 
+    /// @dev Allow owner set user's vesting struct
+    /// @param _vestingDetails A list of user's vesting
     function setTeamVesting(VestingDetail[] memory _vestingDetails)
-        public
+        external
         onlyOwner
     {
+        //At least one vesting detail is required.
         require(_vestingDetails.length > 0, "No vesting details provided");
 
         for (uint256 i = 0; i < _vestingDetails.length; i++) {
             address beneficiary = _vestingDetails[i].beneficiary;
+            //Check if beneficiary already has a vesting
             require(
-                !vestingExists[beneficiary],
+                vestingDetails[beneficiary].vestingAmount == 0,
                 "Vesting already exists for beneficiary"
             );
             require(
                 beneficiary != owner() && beneficiary != self,
                 "Beneficiary is not allowed to be owner or self"
             );
+            //New vesting amount must be great than zore
             require(
                 _vestingDetails[i].vestingAmount > 0,
                 "Beneficiary has no vesting amount"
             );
+            //New vesting duration must be great than zore
             require(
                 _vestingDetails[i].duration > 0,
                 "beneficiary has no duration"
             );
-            //cliff period 6 months
+            //New vesting cliam start time must be great than 0
             require(
-                _vestingDetails[i].claimStartTime > 0,
+                _vestingDetails[i].claimStartTime > block.timestamp,
                 "Beneficiary has no claimStartTime"
             );
+            //New vesting initial claimed amount must be zore
             require(
                 _vestingDetails[i].claimedAmount == 0,
                 "Claimed amount is not valid"
             );
+            //New vesting initial last claimed amount must be zore
             require(
                 _vestingDetails[i].lastClaimedTime == 0,
                 "Last claimed time is not valid"
             );
+            //New vesting initial amount must be great than zore
             require(
                 _vestingDetails[i].initialAmount > 0,
                 "Initial amount is not valid"
             );
+            //New vesting initial claimed must be false
             require(
                 _vestingDetails[i].initialClaimed == false,
                 "Initial claimed can not be true"
@@ -99,96 +110,122 @@ contract TeamVesting is Ownable {
                 _vestingDetails[i].initialAmount,
                 _vestingDetails[i].initialClaimed,
                 _vestingDetails[i].claimStartTime,
-                false
+                true
             );
 
-            vestingExists[beneficiary] = true;
+            emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
     }
 
-    function claim() public {
+    function claim() external {
         require(
             startDate != 0 && block.timestamp > startDate,
             "Vesting period has not started"
         );
-        require(vestingExists[msg.sender] == true, "Vesting does not exist");
+        address beneficiary = msg.sender;
         require(
-            vestingDetails[msg.sender].terminated == false,
+            vestingDetails[beneficiary].vestingAmount > 0,
+            "Vesting does not exist"
+        );
+        require(
+            vestingDetails[beneficiary].exists == true,
             "Beneficiary has terminated"
         );
         require(
-            block.timestamp > vestingDetails[msg.sender].claimStartTime,
+            block.timestamp > vestingDetails[beneficiary].claimStartTime,
             "Claiming period has not started"
         );
         require(
-            vestingDetails[msg.sender].claimedAmount <
-                vestingDetails[msg.sender].vestingAmount,
+            vestingDetails[beneficiary].claimedAmount <
+                vestingDetails[beneficiary].vestingAmount,
             "You have already claimed your vesting amount"
         );
 
         uint256 amountToClaim = 0;
 
-        uint256 lastClaimedTime = vestingDetails[msg.sender].lastClaimedTime;
+        uint256 lastClaimedTime = vestingDetails[beneficiary].lastClaimedTime;
 
         if (
-            vestingDetails[msg.sender].initialClaimed == false &&
-            vestingDetails[msg.sender].initialAmount > 0
+            vestingDetails[beneficiary].initialClaimed == false &&
+            vestingDetails[beneficiary].initialAmount > 0
         ) {
-            amountToClaim += vestingDetails[msg.sender].initialAmount;
-            vestingDetails[msg.sender].initialClaimed = true;
+            amountToClaim += vestingDetails[beneficiary].initialAmount;
+            vestingDetails[beneficiary].initialClaimed = true;
         }
 
         if (lastClaimedTime == 0)
-            lastClaimedTime = vestingDetails[msg.sender].claimStartTime;
+            lastClaimedTime = vestingDetails[beneficiary].claimStartTime;
 
         amountToClaim +=
             ((block.timestamp - lastClaimedTime) *
-                (vestingDetails[msg.sender].vestingAmount -
-                    vestingDetails[msg.sender].initialAmount)) /
-            vestingDetails[msg.sender].duration;
+                (vestingDetails[beneficiary].vestingAmount -
+                    vestingDetails[beneficiary].initialAmount)) /
+            vestingDetails[beneficiary].duration;
 
         // In case the last claim amount is greater than the remaining amount
         if (
             amountToClaim >
-            vestingDetails[msg.sender].vestingAmount -
-                vestingDetails[msg.sender].claimedAmount
+            vestingDetails[beneficiary].vestingAmount -
+                vestingDetails[beneficiary].claimedAmount
         )
             amountToClaim =
-                vestingDetails[msg.sender].vestingAmount -
-                vestingDetails[msg.sender].claimedAmount;
+                vestingDetails[beneficiary].vestingAmount -
+                vestingDetails[beneficiary].claimedAmount;
 
-        vestingDetails[msg.sender].claimedAmount += amountToClaim;
-        vestingDetails[msg.sender].lastClaimedTime = block.timestamp;
-        ERC20(RITE).safeTransfer(msg.sender, amountToClaim);
+        vestingDetails[beneficiary].claimedAmount += amountToClaim;
+        vestingDetails[beneficiary].lastClaimedTime = block.timestamp;
+        ERC20(RITE).safeTransfer(beneficiary, amountToClaim);
 
-        emit Claimed(msg.sender, amountToClaim);
+        emit Claimed(beneficiary, amountToClaim);
     }
 
+    /// @dev Get beneficiary's vesting struct
+    /// @param beneficiary Beneficiary address
+    /// @return beneficiary's vesting struct
     function getBeneficiaryVesting(address beneficiary)
-        public
+        external
         view
         returns (VestingDetail memory)
     {
         return vestingDetails[beneficiary];
     }
 
-    function terminateNow(address beneficiary) public onlyOwner {
-        require(vestingExists[beneficiary], "Vesting does not exist");
+    /// @dev Allow owner to terminate beneficiary's vesting
+    /// @param beneficiary a parameter just like in doxygen (must be followed by parameter name)
+    function terminateNow(address beneficiary) external onlyOwner {
+        //Check if beneficiary has a vesting
         require(
-            vestingDetails[beneficiary].terminated == false,
+            vestingDetails[beneficiary].vestingAmount > 0,
+            "Vesting does not exist"
+        );
+        //check if beneficiary exist
+        require(
+            vestingDetails[beneficiary].exists == true,
             "Beneficiary is already terminated"
         );
-        vestingDetails[beneficiary].terminated = true;
+        vestingDetails[beneficiary].exists = false;
 
         emit Terminated(beneficiary);
     }
 
-    function setStartDate(uint256 _startDate) public onlyOwner {
+    /// @dev Allow owner to change the start date of the vesting period
+    /// @param _startDate A date for the vesting to start
+    function setStartDate(uint256 _startDate) external onlyOwner {
         require(_startDate > block.timestamp, "Start date is in the past");
         startDate = _startDate;
     }
 
+    /// @dev Event for terminate beneficiary
+    /// @param beneficiary a beneficiary address
     event Terminated(address indexed beneficiary);
+
+    /// @dev event when beneficiary claim tokens
+    /// @param beneficiary a beneficiary address
+    /// @param amount a claimed amount
     event Claimed(address indexed beneficiary, uint256 amount);
+
+    /// @dev event when beneficiary's vesting detail been set
+    /// @param beneficiary a beneficiary address
+    /// @param amount a claimed amount
     event Vested(address indexed beneficiary, uint256 amount);
 }

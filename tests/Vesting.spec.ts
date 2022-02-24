@@ -165,7 +165,6 @@ describe("Sale Vesting", () => {
   it("Should not allow user to claim linear before cliff", async () => {
     try {
       await vesting.connect(user).claim();
-      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Claiming is not allowed before cliff period"

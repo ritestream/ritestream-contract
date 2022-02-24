@@ -71,8 +71,7 @@ describe("Team Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("250000"),
         initialClaimed: false,
-        claimStartTime: startTime + 15552000,
-        terminated: false
+        claimStartTime: startTime + 15552000
       },
       {
         beneficiary: employee2Address,
@@ -82,14 +81,12 @@ describe("Team Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("10500"),
         initialClaimed: false,
-        claimStartTime: startTime + 15552000,
-        terminated: false
+        claimStartTime: startTime + 15552000
       }
     ];
 
     try {
       await employeeVesting.connect(employee1).setTeamVesting(employeeList);
-      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -109,13 +106,13 @@ describe("Team Vesting", () => {
     expect(employee1VestingDetail.vestingAmount).to.equal(
       ethers.BigNumber.from("1500000")
     );
-    expect(employee1VestingDetail.terminated).to.equal(false);
+    expect(employee1VestingDetail.exists).to.equal(true);
 
     expect(employee2VestingDetail.beneficiary).to.equal(employee2Address);
     expect(employee2VestingDetail.vestingAmount).to.equal(
       ethers.BigNumber.from("625000")
     );
-    expect(employee2VestingDetail.terminated).to.equal(false);
+    expect(employee2VestingDetail.exists).to.equal(true);
   });
 
   it("Should not allow owner to set vesting if vesting already exist", async () => {
@@ -130,8 +127,7 @@ describe("Team Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("250000"),
         initialClaimed: false,
-        claimStartTime: startTime + 15552000, //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM +  180 days
-        terminated: true
+        claimStartTime: startTime + 15552000 //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM +  180 days
       },
       {
         beneficiary: employee2Address,
@@ -141,8 +137,7 @@ describe("Team Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("10500"),
         initialClaimed: false,
-        claimStartTime: startTime + 15552000, ///Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM + 180 days
-        terminated: true
+        claimStartTime: startTime + 15552000 ///Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM + 180 days
       }
     ];
 
@@ -213,7 +208,7 @@ describe("Team Vesting", () => {
     const employee2VestingDetail = await employeeVesting.getBeneficiaryVesting(
       await employee2.getAddress()
     );
-    expect(employee2VestingDetail.terminated).to.equal(true);
+    expect(employee2VestingDetail.exists).to.equal(false);
   });
 
   it("Should allow employee to claim rest of the token after vesting period", async () => {
