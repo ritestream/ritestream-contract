@@ -65,12 +65,12 @@ contract TeamVesting is Ownable {
                 beneficiary != owner() && beneficiary != self,
                 "Beneficiary is not allowed to be owner or self"
             );
-            //New vesting amount must be great than zore
+            //New vesting amount must be great than 0
             require(
                 _vestingDetails[i].vestingAmount > 0,
                 "Beneficiary has no vesting amount"
             );
-            //New vesting duration must be great than zore
+            //New vesting duration must be great than 0
             require(
                 _vestingDetails[i].duration > 0,
                 "beneficiary has no duration"
@@ -80,17 +80,17 @@ contract TeamVesting is Ownable {
                 _vestingDetails[i].claimStartTime > block.timestamp,
                 "Beneficiary has no claimStartTime"
             );
-            //New vesting initial claimed amount must be zore
+            //New vesting initial claimed amount must be 0
             require(
                 _vestingDetails[i].claimedAmount == 0,
                 "Claimed amount is not valid"
             );
-            //New vesting initial last claimed amount must be zore
+            //New vesting initial last claimed amount must be 0
             require(
                 _vestingDetails[i].lastClaimedTime == 0,
                 "Last claimed time is not valid"
             );
-            //New vesting initial amount must be great than zore
+            //New vesting initial amount must be great than 0
             require(
                 _vestingDetails[i].initialAmount > 0,
                 "Initial amount is not valid"
