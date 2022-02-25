@@ -81,7 +81,7 @@ contract TeamVesting is Ownable {
                 _vestingDetails[i].claimStartTime > block.timestamp,
                 "Beneficiary has no claimStartTime"
             );
-            //New vesting initial claimed amount must be 0
+            //New vesting initial claimed amount must be 0,indicating that they have never claimed
             require(
                 _vestingDetails[i].claimedAmount == 0,
                 "Claimed amount is not valid"
@@ -91,7 +91,7 @@ contract TeamVesting is Ownable {
                 _vestingDetails[i].lastClaimedTime == 0,
                 "Last claimed time is not valid"
             );
-            //New vesting initial amount must be great than 0
+            //New vesting initial amount must be greater than 0
             require(
                 _vestingDetails[i].initialAmount > 0,
                 "Initial amount is not valid"

@@ -68,7 +68,7 @@ contract SaleVesting is Ownable {
                 vestingDetails[beneficiary].vestingAmount == 0,
                 "Vesting already exists"
             );
-            //Beneficiary's vesting amount must be great than 0
+            //Beneficiary's vesting amount must be greater than 0
             require(
                 _vestingDetails[i].vestingAmount > 0,
                 "Vesting amount is not valid"
@@ -80,12 +80,12 @@ contract SaleVesting is Ownable {
                 _vestingDetails[i].claimedAmount == 0,
                 "Claimed amount is not valid"
             );
-            //New beneficiary's last claimed time must be 0
+            //New beneficiary's last claimed time must be 0,indicating that they have never claimed
             require(
                 _vestingDetails[i].lastClaimedTime == 0,
                 "Last claimed time is not valid"
             );
-            //New beneficiary's initial amount must be great than 0
+            //New beneficiary's initial amount must be greater than 0
             require(
                 _vestingDetails[i].initialAmount > 0,
                 "TGE initial release amount is not valid"
@@ -95,7 +95,7 @@ contract SaleVesting is Ownable {
                 _vestingDetails[i].initialClaimed == false,
                 "Initial claimed is not valid"
             );
-            //New beneficiary's claim start time must be greater than TGE date
+            //New beneficiary's claim start time must be not be before TGE date
             require(
                 _vestingDetails[i].claimStartTime >= TGEDate,
                 "Claim start time is not valid"
@@ -121,17 +121,17 @@ contract SaleVesting is Ownable {
      */
     function claim() external {
         address beneficiary = msg.sender;
-        //TGE date must be greater than 0 and block timestamp must be equal or greater than TGE date
+        //TGE date must be must be in the past but not 0
         require(
             TGEDate > 0 && block.timestamp >= TGEDate,
             "Claim is not allowed before TGE start"
         );
-        //Beneficiary must have a vesting
+        //Beneficiary must have a vesting amount
         require(
             vestingDetails[beneficiary].vestingAmount > 0,
             "Vesting does not exist"
         );
-        //Beneficiary must have not claimed all of his vesting
+        //Beneficiary must have not claimed all of their vesting amount
         require(
             vestingDetails[beneficiary].claimedAmount <
                 vestingDetails[beneficiary].vestingAmount,
