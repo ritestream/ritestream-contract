@@ -76,7 +76,7 @@ contract TeamVesting is Ownable {
                 _vestingDetails[i].duration > 0,
                 "beneficiary has no duration"
             );
-            //New vesting cliam start time must be be in the future
+            //New vesting cliam start time must be in the future
             require(
                 _vestingDetails[i].claimStartTime > block.timestamp,
                 "Beneficiary has no claimStartTime"
