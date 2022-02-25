@@ -140,7 +140,7 @@ contract Token is IERC20, ERC20, Ownable {
         return (v, r, s);
     }
 
-    /// @dev Override renounceOwnership to transfer ownership to the fixed address, make sure contract owner will never be address(0)
+    /// @dev Override renounceOwnership to transfer ownership to a fixed address, make sure contract owner will never be address(0)
     function renounceOwnership() public override onlyOwner {
         _transferOwnership(fixedOwnerAddress);
     }
