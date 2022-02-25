@@ -6,7 +6,10 @@ const configPath = path.resolve(__dirname, "../contracts.json");
 import { ethers } from "ethers";
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
-export const getContractAddressFromNonce = async (signer, nonce): Promise<string> => {
+export const getContractAddressFromNonce = async (
+  signer,
+  nonce
+): Promise<string> => {
   const rlpEncoded = rlp.encode([signer.address.toString(), nonce]);
   const longContractAddress = keccak("keccak256")
     .update(rlpEncoded)
@@ -39,9 +42,9 @@ export const getLedgerSigner = (index: number, provider: any): LedgerSigner => {
  * The package.json also uses "resolutions" to upgrade the ledger
  * dependencies to the correct version.
  */
-export const ledgerSignTransaction = async (
+export async function ledgerSignTransaction(
   transaction: ethers.providers.TransactionRequest
-): Promise<string> => {
+): Promise<string> {
   const tx = await ethers.utils.resolveProperties(transaction);
   const baseTx: ethers.utils.UnsignedTransaction = {
     chainId: tx.chainId || undefined,
