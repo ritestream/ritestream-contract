@@ -23,7 +23,7 @@ contract Vault is Ownable {
     /// @param amount The amount of tokens deposited
     event Deposited(address indexed from, uint256 amount);
 
-    /// @dev Event emitted when a user withdraw tokens
+    /// @dev Event emitted when a user withdraws tokens
     /// @param to The user address
     /// @param amount The amount of tokens deposited
     event Withdrawn(address indexed to, uint256 amount);
@@ -40,7 +40,7 @@ contract Vault is Ownable {
         emit Deposited(from, amount);
     }
 
-    /// @dev Function for withdraw tokens
+    /// @dev Withdraw tokens
     /// @param to The user address
     /// @param amount The amount of tokens deposited
     function userWithdraw(address to, uint256 amount) external onlyOwner {
@@ -58,7 +58,7 @@ contract Vault is Ownable {
         return ERC20(RITE).balanceOf(self);
     }
 
-    /// @dev Function to withdraw all tokens from vault
+    /// @dev Withdraw all tokens from the vault
     function withdraw() external onlyOwner {
         //Balance of the vault
         uint256 amount = ERC20(RITE).balanceOf(self);

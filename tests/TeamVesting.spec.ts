@@ -115,7 +115,7 @@ describe("Team Vesting", () => {
     expect(employee2VestingDetail.exists).to.equal(true);
   });
 
-  it("Should not allow owner to set vesting if vesting already exist", async () => {
+  it("Should not allow owner to set vesting if vesting already exists", async () => {
     const employee1Address = await employee1.getAddress();
     const employee2Address = await employee2.getAddress();
     const employeeList = [

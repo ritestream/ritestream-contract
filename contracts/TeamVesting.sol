@@ -45,7 +45,7 @@ contract TeamVesting is Ownable {
     // Vesting detail list
     mapping(address => VestingDetail) internal vestingDetails;
 
-    /// @dev Allow owner set user's vesting struct
+    /// @dev Allow owner to set user's vesting struct
     /// @param _vestingDetails A list of user's vesting
     function setTeamVesting(VestingDetail[] memory _vestingDetails)
         external
@@ -96,7 +96,7 @@ contract TeamVesting is Ownable {
                 _vestingDetails[i].initialAmount > 0,
                 "Initial amount is not valid"
             );
-            //New vesting initial claimed must be false
+            //New vesting initial claimed amount must be false
             require(
                 _vestingDetails[i].initialClaimed == false,
                 "Initial claimed can not be true"
@@ -192,7 +192,7 @@ contract TeamVesting is Ownable {
     }
 
     /// @dev Allow owner to terminate beneficiary's vesting
-    /// @param beneficiary a parameter just like in doxygen (must be followed by parameter name)
+    /// @param beneficiary Address of beneficiary whose vesting should be terminated
     function terminateNow(address beneficiary) external onlyOwner {
         //Check if beneficiary has a vesting
         require(

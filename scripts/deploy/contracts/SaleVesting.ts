@@ -4,7 +4,7 @@ import saleVestingSeed from "../../saleVestingSeed";
 
 export const contractNames = () => ["saleVesting"];
 
-const tgeDate = 1644897862; // change the date of TGE, can be change once the contract is deployed
+const tgeDate = process.env.TGE_DATE; //Set the initial date of TGE. It can be changed once the contract is deployed.
 export const constructorArguments = () => [
   contracts.binancetest.token,
   tgeDate
