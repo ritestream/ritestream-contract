@@ -45,18 +45,18 @@ contract SaleVesting is Ownable {
      * @dev Allow owner set user's vesting struct
      * @param _vestingDetails A list of beneficiary's vesting.
      */
-    function setVesting(VestingDetail[] memory _vestingDetails)
+    function setVesting(VestingDetail[] calldata _vestingDetails)
         external
         onlyOwner
     {
+        uint256 count = _vestingDetails.length;
         //At least one vesting detail is required.
-        require(_vestingDetails.length > 0, "No vesting list provided");
+        require(count > 0, "No vesting list provided");
         require(
             block.timestamp < TGEDate,
             "TGE already finished, no more vesting"
         );
 
-        uint256 count = _vestingDetails.length;
         for (uint256 i = 0; i < count; i++) {
             address beneficiary = _vestingDetails[i].beneficiary;
             require(
@@ -135,7 +135,7 @@ contract SaleVesting is Ownable {
         require(
             vestingDetails[beneficiary].claimedAmount <
                 vestingDetails[beneficiary].vestingAmount,
-            "You have already claimed your vesting amount"
+            "You have already claimed your vested amount"
         );
 
         uint256 amountToClaim = 0;
