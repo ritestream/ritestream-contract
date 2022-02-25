@@ -1,7 +1,7 @@
 ﻿import { ethers } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
-import { getEventData, getRevertMessage } from "./utils";
+import { getRevertMessage } from "./utils";
 
 let token: tsEthers.Contract;
 let deployer: tsEthers.Signer;
@@ -117,24 +117,16 @@ describe("ERC20 Token", () => {
   });
 
   it("Should only allow owner to call renounceOwnership and new owner always be the fixed address ", async () => {
-    try {
-      await token.connect(user).renounceOwnership();
-    } catch (error) {
-      expect(getRevertMessage(error)).to.equal(
-        "Ownable: caller is not the owner"
-      );
-    }
+    await expect(token.connect(user).renounceOwnership()).to.be.revertedWith(
+      getRevertMessage("Ownable: caller is not the owner")
+    );
 
     await token.renounceOwnership();
     const newOwner = await token.owner();
     expect(newOwner).to.equal("0x1156B992b1117a1824272e31797A2b88f8a7c729"); //this the fixed new owner address
 
-    try {
-      await token.renounceOwnership();
-    } catch (error) {
-      expect(getRevertMessage(error)).to.equal(
-        "Ownable: caller is not the owner"
-      );
-    }
+    await expect(token.renounceOwnership()).to.be.revertedWith(
+      getRevertMessage("Ownable: caller is not the owner")
+    );
   });
 });
