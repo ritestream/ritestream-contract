@@ -26,8 +26,8 @@ export default {
       allowUnlimitedContractSize: false
     },
     binance: {
-      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
-      chainId: 97,
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
       gasPrice: 20000000000,
       accounts: [process.env.PRIVATE_KEY]
     },
