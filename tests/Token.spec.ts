@@ -1,7 +1,7 @@
 ﻿import { ethers } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
-import { getEventData, getRevertMessage } from "./utils";
+import { getRevertMessage } from "./utils";
 
 let token: tsEthers.Contract;
 let deployer: tsEthers.Signer;
@@ -11,8 +11,7 @@ const vaultAddress = "0xa3A0Ce9592fE2bfA378Cc4dD5aB24Be150f00029"; //fake vault 
 
 describe("ERC20 Token", () => {
   before(async () => {
-    [deployer, user] = await ethers.getSigners();
-    otherUser = (await ethers.getSigners())[1];
+    [deployer, user, otherUser] = await ethers.getSigners();
     token = await (
       await ethers.getContractFactory("Token")
     ).deploy("Token", "TKN", 18);
@@ -115,5 +114,19 @@ describe("ERC20 Token", () => {
     } catch (error) {
       expect(getRevertMessage(error)).to.equal("Not authorized");
     }
+  });
+
+  it("Should only allow owner to call renounceOwnership and new owner always be the fixed address ", async () => {
+    await expect(token.connect(user).renounceOwnership()).to.be.revertedWith(
+      getRevertMessage("Ownable: caller is not the owner")
+    );
+
+    await token.renounceOwnership();
+    const newOwner = await token.owner();
+    expect(newOwner).to.equal("0x1156B992b1117a1824272e31797A2b88f8a7c729"); //this the fixed new owner address
+
+    await expect(token.renounceOwnership()).to.be.revertedWith(
+      getRevertMessage("Ownable: caller is not the owner")
+    );
   });
 });
