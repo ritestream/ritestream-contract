@@ -37,6 +37,7 @@ describe("Vault Contract", () => {
       await vault
         .connect(user)
         .userDeposit(userAddress, "1000000000000000000000");
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -96,6 +97,7 @@ describe("Vault Contract", () => {
       await vault
         .connect(user)
         .userWithdraw(userAddress, "1000000000000000000000");
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -103,16 +105,35 @@ describe("Vault Contract", () => {
     }
   });
 
-  it("Should allow owner to withdraw token to user address", async () => {
+  it("Should allow owner to withdraw token address", async () => {
     const userAddress = await user.getAddress();
     const tx = await (
-      await vault.userWithdraw(userAddress, "1000000000000000000000")
+      await vault.userWithdraw(userAddress, ethers.BigNumber.from("1"))
     ).wait(1);
     const event = getEventData("Withdrawn", vault, tx);
     expect(event.to).to.equal(userAddress);
-    expect(event.amount).to.equal("1000000000000000000000");
+    expect(event.amount).to.equal(ethers.BigNumber.from("1"));
 
     const userBalanceAfter = await token.balanceOf(userAddress);
-    expect(userBalanceAfter).to.equal("1000000000000000000000");
+    expect(userBalanceAfter).to.equal(ethers.BigNumber.from("1"));
+  });
+
+  it("Should only allow owner to withdraw token from contract", async () => {
+    try {
+      await vault.connect(user).withdraw();
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal(
+        "Ownable: caller is not the owner"
+      );
+    }
+
+    const deployerAddress = await deployer.getAddress();
+    const balanceBefore = await token.balanceOf(deployerAddress);
+    const balanceOfVaultBefore = await token.balanceOf(vault.address);
+
+    await (await vault.withdraw()).wait(1);
+
+    const balanceAfter = await token.balanceOf(deployerAddress);
+    expect(balanceAfter).to.equal(balanceBefore.add(balanceOfVaultBefore));
   });
 });

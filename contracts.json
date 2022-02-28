@@ -5,5 +5,9 @@
     "tokenUpgradeable": "0xA283F5c916bCd82b953020124e2e38dAb430DE10",
     "vault": "0xa3A0Ce9592fE2bfA378Cc4dD5aB24Be150f00029",
     "token": "0x2F23C0D879e37eb8bEe10D4174a287f65043D688"
+  },
+  "binancetest": {
+    "token": "0xf62F3aF0Ee56E00655a99a952Ea507e58CDf1766",
+    "saleVesting": "0x620f118883aA34658929ca63d22da0628ef9fE6d"
   }
 }

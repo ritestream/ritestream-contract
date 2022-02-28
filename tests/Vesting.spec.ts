@@ -44,14 +44,14 @@ describe("Sale Vesting", () => {
   it("Should only allow owner to set start time", async () => {
     const tgeDate = startTime + 1000;
     try {
-      await vesting.connect(user).setTgeDate(tgeDate);
+      await vesting.connect(user).setTGEDate(tgeDate);
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
       );
     }
 
-    await vesting.setTgeDate(tgeDate);
+    await vesting.setTGEDate(tgeDate);
 
     expect(await vesting.TGEDate()).to.equal(tgeDate);
   });
@@ -84,19 +84,58 @@ describe("Sale Vesting", () => {
 
     await vesting.setVesting(userVestingList);
 
-    const userVesting = await vesting.connect(user).getUserVesting();
+    const userVesting = await vesting
+      .connect(user)
+      .getBeneficiaryVesting(await user.getAddress());
 
     expect(userVesting.beneficiary).to.equal(userAddress);
     expect(userVesting.vestingAmount).to.equal(ethers.BigNumber.from("10000"));
 
-    const user2Vesting = await vesting.connect(user2).getUserVesting();
+    const user2Vesting = await vesting
+      .connect(user2)
+      .getBeneficiaryVesting(await user2.getAddress());
     expect(user2Vesting.beneficiary).to.equal(user2Address);
     expect(user2Vesting.vestingAmount).to.equal(ethers.BigNumber.from("20000"));
+  });
+
+  it("Should not allow set vesting if vesting already exist", async () => {
+    const userAddress = await user.getAddress();
+    const user2Address = await user2.getAddress();
+    const userVestingList = [
+      {
+        beneficiary: userAddress,
+        vestingAmount: ethers.BigNumber.from("10000"),
+        duration: 31556926, //12 months
+        claimedAmount: 0,
+        lastClaimedTime: 0,
+        initialAmount: ethers.BigNumber.from("100"),
+        initialClaimed: false,
+        claimStartTime: startTime + 2592000 ////Tuesday, February 8, 2022 11:03:12 AM GMT+10:00 +  30days
+      },
+      {
+        beneficiary: user2Address,
+        vestingAmount: ethers.BigNumber.from("20000"),
+        duration: 31556926, //12 months
+        claimedAmount: 0,
+        lastClaimedTime: 0,
+        initialAmount: ethers.BigNumber.from("200"),
+        initialClaimed: false,
+        claimStartTime: startTime + 2592000 // Tuesday, February 8, 2022 11:03:12 AM GMT+10:00
+      }
+    ];
+
+    try {
+      await vesting.setVesting(userVestingList);
+      throw new Error("Should not reach here");
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal("Vesting already exists");
+    }
   });
 
   it("Should not allow to claim before TGE start", async () => {
     try {
       await vesting.connect(user).claim();
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Claim is not allowed before TGE start"
@@ -114,6 +153,15 @@ describe("Sale Vesting", () => {
     const userBalanceAfter = await token.balanceOf(user.getAddress());
 
     expect(userBalanceAfter).to.equal(ethers.BigNumber.from("100"));
+
+    const userAddress = await user.getAddress();
+    const vestingDetail = await vesting
+      .connect(user)
+      .getBeneficiaryVesting(userAddress);
+
+    expect(ethers.utils.formatUnits(vestingDetail.lastClaimedTime, 0)).to.equal(
+      (startTime + 7200).toString()
+    );
   });
 
   it("Should allow user2 to claim initial amount with linear amount after TGE start", async () => {

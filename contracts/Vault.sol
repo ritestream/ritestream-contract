@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Token.sol";
 
+/// @dev Vault contract for app user to deposit and withdraw tokens
 contract Vault is Ownable {
     using SafeERC20 for ERC20;
 
@@ -17,10 +18,19 @@ contract Vault is Ownable {
         RITE = _RITE;
     }
 
+    /// @dev Event emitted when a user deposits tokens
+    /// @param from The user address
+    /// @param amount The amount of tokens deposited
     event Deposited(address indexed from, uint256 amount);
+
+    /// @dev Event emitted when a user withdraws tokens
+    /// @param to The user address
+    /// @param amount The amount of tokens withdrawn
     event Withdrawn(address indexed to, uint256 amount);
 
-    //Deposit RITE token from user address into vault
+    /// @dev Function for depositing tokens
+    /// @param from The user address
+    /// @param amount The amount of tokens deposited
     function userDeposit(address from, uint256 amount) external onlyOwner {
         require(amount > 0, "Amount must be greater than 0");
         require(from != self, "Cannot deposit from self");
@@ -30,7 +40,9 @@ contract Vault is Ownable {
         emit Deposited(from, amount);
     }
 
-    //Withdraw RITE token from vault to user address
+    /// @dev Withdraw tokens
+    /// @param to The user address
+    /// @param amount The amount of tokens withdrawn
     function userWithdraw(address to, uint256 amount) external onlyOwner {
         require(amount > 0, "Amount must be greater than 0");
         require(to != self, "Cannot withdraw to self");
@@ -41,12 +53,15 @@ contract Vault is Ownable {
         emit Withdrawn(to, amount);
     }
 
+    /// @dev Get the balance of the vault
     function getBalance() internal view returns (uint256) {
         return ERC20(RITE).balanceOf(self);
     }
 
+    /// @dev Withdraw all tokens from the vault
     function withdraw() external onlyOwner {
+        //Balance of the vault
         uint256 amount = ERC20(RITE).balanceOf(self);
-        ERC20(RITE).safeTransfer(self, amount);
+        ERC20(RITE).safeTransfer(msg.sender, amount);
     }
 }

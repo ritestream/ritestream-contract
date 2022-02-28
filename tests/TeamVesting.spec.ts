@@ -2,6 +2,7 @@ import hre, { ethers } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
 import { getRevertMessage } from "./utils";
+import { exists } from "fs";
 
 let token: tsEthers.Contract;
 let employeeVesting: tsEthers.Contract;
@@ -47,6 +48,7 @@ describe("Team Vesting", () => {
   it("Should only allow owner to set start time", async () => {
     try {
       await employeeVesting.connect(employee1).setStartDate(startTime);
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -69,8 +71,7 @@ describe("Team Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("250000"),
         initialClaimed: false,
-        claimStartTime: startTime + 15552000,
-        terminated: false
+        claimStartTime: startTime + 15552000
       },
       {
         beneficiary: employee2Address,
@@ -80,8 +81,7 @@ describe("Team Vesting", () => {
         lastClaimedTime: 0,
         initialAmount: ethers.BigNumber.from("10500"),
         initialClaimed: false,
-        claimStartTime: startTime + 15552000,
-        terminated: false
+        claimStartTime: startTime + 15552000
       }
     ];
 
@@ -95,10 +95,10 @@ describe("Team Vesting", () => {
 
     await employeeVesting.setTeamVesting(employeeList);
 
-    const employee1VestingDetail = await employeeVesting.getEmployeeVesting(
+    const employee1VestingDetail = await employeeVesting.getBeneficiaryVesting(
       employee1Address
     );
-    const employee2VestingDetail = await employeeVesting.getEmployeeVesting(
+    const employee2VestingDetail = await employeeVesting.getBeneficiaryVesting(
       employee2Address
     );
 
@@ -106,15 +106,50 @@ describe("Team Vesting", () => {
     expect(employee1VestingDetail.vestingAmount).to.equal(
       ethers.BigNumber.from("1500000")
     );
-    expect(employee1VestingDetail.terminated).to.equal(false);
+    expect(employee1VestingDetail.exists).to.equal(true);
 
     expect(employee2VestingDetail.beneficiary).to.equal(employee2Address);
     expect(employee2VestingDetail.vestingAmount).to.equal(
       ethers.BigNumber.from("625000")
     );
-    expect(employee2VestingDetail.terminated).to.equal(false);
+    expect(employee2VestingDetail.exists).to.equal(true);
   });
 
+  it("Should not allow owner to set vesting if vesting already exists", async () => {
+    const employee1Address = await employee1.getAddress();
+    const employee2Address = await employee2.getAddress();
+    const employeeList = [
+      {
+        beneficiary: employee1Address,
+        vestingAmount: ethers.BigNumber.from("1500000"),
+        duration: 93312000, //36 months
+        claimedAmount: 0,
+        lastClaimedTime: 0,
+        initialAmount: ethers.BigNumber.from("250000"),
+        initialClaimed: false,
+        claimStartTime: startTime + 15552000 //Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM +  180 days
+      },
+      {
+        beneficiary: employee2Address,
+        vestingAmount: ethers.BigNumber.from("625000"),
+        duration: 93312000, //36 months
+        claimedAmount: 0,
+        lastClaimedTime: 0,
+        initialAmount: ethers.BigNumber.from("10500"),
+        initialClaimed: false,
+        claimStartTime: startTime + 15552000 ///Date and time (GMT): Tuesday, February 8, 2022 11:23:14 PM + 180 days
+      }
+    ];
+
+    try {
+      await employeeVesting.setTeamVesting(employeeList);
+      throw new Error("Should not reach here");
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal(
+        "Vesting already exists for beneficiary"
+      );
+    }
+  });
   it("Should not allow employee to claim token before the cliff", async () => {
     await hre.network.provider.request({
       method: "evm_setNextBlockTimestamp",
@@ -123,6 +158,7 @@ describe("Team Vesting", () => {
 
     try {
       await employeeVesting.connect(employee1).claim();
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Claiming period has not started"
@@ -160,6 +196,7 @@ describe("Team Vesting", () => {
       await employeeVesting
         .connect(employee1)
         .terminateNow(await employee2.getAddress());
+      throw new Error("Should not reach here");
     } catch (error) {
       expect(getRevertMessage(error)).to.equal(
         "Ownable: caller is not the owner"
@@ -168,10 +205,10 @@ describe("Team Vesting", () => {
 
     await employeeVesting.terminateNow(await employee2.getAddress());
 
-    const employee2VestingDetail = await employeeVesting.getEmployeeVesting(
+    const employee2VestingDetail = await employeeVesting.getBeneficiaryVesting(
       await employee2.getAddress()
     );
-    expect(employee2VestingDetail.terminated).to.equal(true);
+    expect(employee2VestingDetail.exists).to.equal(false);
   });
 
   it("Should allow employee to claim rest of the token after vesting period", async () => {
@@ -189,8 +226,9 @@ describe("Team Vesting", () => {
   it("Should not allow employee to claim token if been terminated", async () => {
     try {
       await employeeVesting.connect(employee2).claim();
+      throw new Error("Should not reach here");
     } catch (error) {
-      expect(getRevertMessage(error)).to.equal("Beneficiary is terminated");
+      expect(getRevertMessage(error)).to.equal("Beneficiary has terminated");
     }
   });
 });
