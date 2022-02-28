@@ -42,7 +42,7 @@ contract Vault is Ownable {
 
     /// @dev Withdraw tokens
     /// @param to The user address
-    /// @param amount The amount of tokens deposited
+    /// @param amount The amount of tokens withdrawn
     function userWithdraw(address to, uint256 amount) external onlyOwner {
         require(amount > 0, "Amount must be greater than 0");
         require(to != self, "Cannot withdraw to self");
