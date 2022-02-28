@@ -25,7 +25,7 @@ contract Vault is Ownable {
 
     /// @dev Event emitted when a user withdraws tokens
     /// @param to The user address
-    /// @param amount The amount of tokens deposited
+    /// @param amount The amount of tokens withdrawn
     event Withdrawn(address indexed to, uint256 amount);
 
     /// @dev Function for depositing tokens
