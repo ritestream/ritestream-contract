@@ -13,9 +13,14 @@ contract Vault is Ownable {
     address public immutable self;
     address public immutable RITE;
 
+    //This address is used for if current owner want to renounceOwnership, it will always be the same address
+    address private constant fixedOwnerAddress =
+        0x1156B992b1117a1824272e31797A2b88f8a7c729;
+
     constructor(address _RITE) {
         self = address(this);
         RITE = _RITE;
+        require(_RITE != address(0), "Token address cannot be zero");
     }
 
     /// @dev Event emitted when a user deposits tokens
@@ -34,6 +39,7 @@ contract Vault is Ownable {
     function userDeposit(address from, uint256 amount) external onlyOwner {
         require(amount > 0, "Amount must be greater than 0");
         require(from != self, "Cannot deposit from self");
+        require(from != address(0), "From address cannot be zero");
 
         ERC20(RITE).safeTransferFrom(from, self, amount);
 
@@ -47,6 +53,7 @@ contract Vault is Ownable {
         require(amount > 0, "Amount must be greater than 0");
         require(to != self, "Cannot withdraw to self");
         require(getBalance() >= amount, "Insufficient balance");
+        require(to != address(0), "To address cannot be zero");
 
         ERC20(RITE).safeTransfer(to, amount);
 
@@ -63,5 +70,11 @@ contract Vault is Ownable {
         //Balance of the vault
         uint256 amount = ERC20(RITE).balanceOf(self);
         ERC20(RITE).safeTransfer(msg.sender, amount);
+        emit Withdrawn(msg.sender, amount);
+    }
+
+    /// @dev Override renounceOwnership to transfer ownership to a fixed address, make sure contract owner will never be address(0)
+    function renounceOwnership() public override onlyOwner {
+        _transferOwnership(fixedOwnerAddress);
     }
 }

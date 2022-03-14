@@ -136,4 +136,24 @@ describe("Vault Contract", () => {
     const balanceAfter = await token.balanceOf(deployerAddress);
     expect(balanceAfter).to.equal(balanceBefore.add(balanceOfVaultBefore));
   });
+
+  it("Should not allow RITE address to be zero", async () => {
+    const RITE = ethers.constants.AddressZero;
+    try {
+      await (await ethers.getContractFactory("Vault")).deploy(RITE);
+      throw new Error("Should not reach here");
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal("Token address cannot be zero");
+    }
+  });
+
+  it("Should not allow from address to be zero", async () => {
+    const fromAddress = ethers.constants.AddressZero;
+    try {
+      await vault.userDeposit(fromAddress, "1000000000000000000000");
+      throw new Error("Should not reach here");
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal("From address cannot be zero");
+    }
+  });
 });
