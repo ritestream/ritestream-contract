@@ -1,5 +1,4 @@
-pragma solidity ^0.8.11;
-pragma abicoder v2;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -32,11 +31,22 @@ contract SaleVesting is Ownable {
     address public immutable self;
     address public immutable RITE;
     uint256 public TGEDate;
+    uint256 public deployDate;
+    uint256 public totalClaimed;
+    uint256 public totalVestingAmount = 0;
+
+    event SetTGEDate(uint256 date);
 
     constructor(address _RITE, uint256 _TGEDate) {
+        TGEDate = _TGEDate;
+        deployDate = block.timestamp;
+        require(
+            TGEDate >= deployDate,
+            "TGE cannot be before the deployment date"
+        );
+        require(_RITE != address(0), "Address cannot be zero");
         self = address(this);
         RITE = _RITE;
-        TGEDate = _TGEDate;
     }
 
     mapping(address => VestingDetail) internal vestingDetails;
@@ -92,7 +102,7 @@ contract SaleVesting is Ownable {
             );
             //New beneficiary's initial claimed must be false
             require(
-                _vestingDetails[i].initialClaimed == false,
+                !_vestingDetails[i].initialClaimed,
                 "Initial claimed is not valid"
             );
             //New beneficiary's claim start time must be not be before TGE date
@@ -112,8 +122,15 @@ contract SaleVesting is Ownable {
                 _vestingDetails[i].claimStartTime
             );
 
+            totalVestingAmount +=
+                _vestingDetails[i].initialAmount +
+                _vestingDetails[i].vestingAmount;
+
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
+        //Check there are tokens available
+        uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
+        require(contractTokenBalance >= totalVestingAmount - totalClaimed);
     }
 
     /**
@@ -142,7 +159,7 @@ contract SaleVesting is Ownable {
 
         // if initial claim is not done, claim initial amount + linear amount
         if (
-            vestingDetails[beneficiary].initialClaimed == false &&
+            !vestingDetails[beneficiary].initialClaimed &&
             vestingDetails[beneficiary].initialAmount > 0
         ) {
             amountToClaim += vestingDetails[beneficiary].initialAmount;
@@ -175,6 +192,7 @@ contract SaleVesting is Ownable {
 
         vestingDetails[beneficiary].lastClaimedTime = block.timestamp;
         vestingDetails[beneficiary].claimedAmount += amountToClaim;
+        totalClaimed += amountToClaim;
         ERC20(RITE).safeTransfer(beneficiary, amountToClaim);
 
         emit Claimed(beneficiary, amountToClaim);
@@ -198,6 +216,7 @@ contract SaleVesting is Ownable {
     function setTGEDate(uint256 _date) external onlyOwner {
         require(_date > block.timestamp, "TGE date is not valid");
         TGEDate = _date;
+        emit SetTGEDate(TGEDate);
     }
 
     /// @dev event when beneficiary claim tokens
