@@ -1,4 +1,4 @@
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -122,9 +122,7 @@ contract SaleVesting is Ownable {
                 _vestingDetails[i].claimStartTime
             );
 
-            totalVestingAmount +=
-                _vestingDetails[i].initialAmount +
-                _vestingDetails[i].vestingAmount;
+            totalVestingAmount += _vestingDetails[i].vestingAmount;
 
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }

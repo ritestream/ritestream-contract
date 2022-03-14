@@ -1,4 +1,4 @@
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -34,6 +34,7 @@ contract TeamVesting is Ownable {
     address public immutable self;
     address public immutable RITE;
     uint256 public startDate;
+    uint256 public totalClaimed;
 
     constructor(address _RITE, uint256 _startDate) {
         deployDate = block.timestamp;
@@ -127,6 +128,9 @@ contract TeamVesting is Ownable {
 
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
+        //Check there are tokens available
+        uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
+        require(contractTokenBalance >= totalVestingAmount - totalClaimed);
     }
 
     function claim() external {
