@@ -147,7 +147,7 @@ describe("Vault Contract", () => {
     }
   });
 
-  it("Should not allow from address to be zero", async () => {
+  it("Should not allow caller address to be zero", async () => {
     const fromAddress = ethers.constants.AddressZero;
     try {
       await vault.userDeposit(fromAddress, "1000000000000000000000");
@@ -155,5 +155,19 @@ describe("Vault Contract", () => {
     } catch (error) {
       expect(getRevertMessage(error)).to.equal("From address cannot be zero");
     }
+  });
+
+  it("Should only allow owner to call renounceOwnership and new owner always be the fixed address ", async () => {
+    await expect(token.connect(user).renounceOwnership()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
+
+    await token.renounceOwnership();
+    const newOwner = await token.owner();
+    expect(newOwner).to.equal("0x1156B992b1117a1824272e31797A2b88f8a7c729"); //this the fixed new owner address
+
+    await expect(token.renounceOwnership()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
   });
 });

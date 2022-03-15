@@ -18,9 +18,9 @@ contract Vault is Ownable {
         0x1156B992b1117a1824272e31797A2b88f8a7c729;
 
     constructor(address _RITE) {
+        require(_RITE != address(0), "Token address cannot be zero");
         self = address(this);
         RITE = _RITE;
-        require(_RITE != address(0), "Token address cannot be zero");
     }
 
     /// @dev Event emitted when a user deposits tokens

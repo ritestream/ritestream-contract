@@ -32,6 +32,8 @@ contract SaleVesting is Ownable {
     address public immutable self;
     address public immutable RITE;
     uint256 public TGEDate;
+    uint256 public totalClaimed;
+    uint256 public totalVestingAmount = 0;
 
     //This address is used for if current owner want to renounceOwnership, it will always be the same address
     address private constant fixedOwnerAddress =
@@ -116,8 +118,13 @@ contract SaleVesting is Ownable {
                 _vestingDetails[i].claimStartTime
             );
 
+            totalVestingAmount += _vestingDetails[i].vestingAmount;
+
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
+        //Check there are tokens available
+        uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
+        require(contractTokenBalance >= totalVestingAmount - totalClaimed);
     }
 
     /**
