@@ -8,6 +8,7 @@ let employeeVesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let employee1: tsEthers.Signer;
 let employee2: tsEthers.Signer;
+let employee3: tsEthers.Signer;
 let startTime;
 
 describe("Team Vesting", () => {
@@ -15,6 +16,7 @@ describe("Team Vesting", () => {
     deployer = (await ethers.getSigners())[0];
     employee1 = (await ethers.getSigners())[1];
     employee2 = (await ethers.getSigners())[2];
+    employee3 = (await ethers.getSigners())[3];
     token = await (
       await ethers.getContractFactory("Token")
     ).deploy("Token", "TKN", 18);

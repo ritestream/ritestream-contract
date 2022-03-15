@@ -31,20 +31,18 @@ contract SaleVesting is Ownable {
     address public immutable self;
     address public immutable RITE;
     uint256 public TGEDate;
-    uint256 public deployDate;
     uint256 public totalClaimed;
     uint256 public totalVestingAmount = 0;
 
     event SetTGEDate(uint256 date);
 
     constructor(address _RITE, uint256 _TGEDate) {
-        TGEDate = _TGEDate;
-        deployDate = block.timestamp;
         require(
-            TGEDate >= deployDate,
+            _TGEDate >= block.timestamp,
             "TGE cannot be before the deployment date"
         );
         require(_RITE != address(0), "Address cannot be zero");
+        TGEDate = _TGEDate;
         self = address(this);
         RITE = _RITE;
     }

@@ -8,6 +8,7 @@ let vesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let user2: tsEthers.Signer;
+let user3: tsEthers.Signer;
 let startTime = 0;
 
 describe("Sale Vesting", () => {
@@ -15,6 +16,7 @@ describe("Sale Vesting", () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];
     user2 = (await ethers.getSigners())[2];
+    user3 = (await ethers.getSigners())[3];
     token = await (
       await ethers.getContractFactory("Token")
     ).deploy("Token", "TKN", 18);

@@ -30,23 +30,22 @@ struct VestingDetail {
 contract TeamVesting is Ownable {
     using SafeERC20 for ERC20;
 
-    uint256 public deployDate;
     address public immutable self;
     address public immutable RITE;
     uint256 public startDate;
     uint256 public totalClaimed;
+    uint256 public totalVestingAmount = 0;
 
     constructor(address _RITE, uint256 _startDate) {
-        deployDate = block.timestamp;
         //Vesting start date
-        startDate = _startDate;
         require(
-            startDate >= deployDate,
+            _startDate >= block.timestamp,
             "Start date cannot be before the deployment date"
         );
+        require(_RITE != address(0), "Address cannot be zero");
         self = address(this);
         RITE = _RITE;
-        require(_RITE != address(0), "Address cannot be zero");
+        startDate = _startDate;
     }
 
     // Vesting detail list
@@ -125,6 +124,8 @@ contract TeamVesting is Ownable {
                 _vestingDetails[i].claimStartTime,
                 true
             );
+
+            totalVestingAmount += _vestingDetails[i].vestingAmount;
 
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
