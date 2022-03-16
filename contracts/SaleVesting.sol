@@ -33,6 +33,8 @@ contract SaleVesting is Ownable {
     uint256 public TGEDate;
     uint256 public totalClaimed;
     uint256 public totalVestingAmount = 0;
+    //Maximun number of vesting detail array.
+    uint256 internal immutable maxVestingDetailArray = 20;
 
     event SetTGEDate(uint256 date);
 
@@ -66,6 +68,16 @@ contract SaleVesting is Ownable {
         );
 
         for (uint256 i = 0; i < count; i++) {
+            //Check on the maximun size over which the for loop will run over.
+            require(i <= maxVestingDetailArray, "Too many vesting details");
+            //Check there are tokens available
+            uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
+            require(
+                contractTokenBalance >=
+                    totalVestingAmount + _vestingDetails[i].vestingAmount,
+                "Not enough tokens"
+            );
+
             address beneficiary = _vestingDetails[i].beneficiary;
             require(
                 beneficiary != owner() && beneficiary != address(0),
@@ -124,9 +136,6 @@ contract SaleVesting is Ownable {
 
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
-        //Check there are tokens available
-        uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
-        require(contractTokenBalance >= totalVestingAmount - totalClaimed);
     }
 
     /**
