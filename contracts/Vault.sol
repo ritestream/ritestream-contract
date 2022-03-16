@@ -57,7 +57,7 @@ contract Vault is Ownable {
     function userWithdraw(address to, uint256 amount) external onlyOwner {
         require(
             (amount > 0 && userDepositBalances[to] >= amount),
-            "Amount must be greater than 0 and user must have enough tokens"
+            "Amount must be greater than zero and must have enough tokens"
         );
         require(getBalance() >= amount, "Insufficient balance");
         require(to != self, "Cannot withdraw to self");
@@ -84,5 +84,10 @@ contract Vault is Ownable {
     /// @dev Override renounceOwnership to transfer ownership to a fixed address, make sure contract owner will never be address(0)
     function renounceOwnership() public override onlyOwner {
         _transferOwnership(fixedOwnerAddress);
+    }
+
+    /// @dev Get the user deposit balance
+    function getUserDepositBalance() external view returns (uint256) {
+        return userDepositBalances[msg.sender];
     }
 }

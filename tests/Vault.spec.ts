@@ -170,4 +170,15 @@ describe("Vault Contract", () => {
       "Ownable: caller is not the owner"
     );
   });
+
+  it("Should not withdraw token more than you deposited", async () => {
+    const userAddress = await user.getAddress();
+    const balance = await vault.connect(user).getUserDepositBalance();
+
+    await expect(
+      vault.userWithdraw(userAddress, balance.add(1))
+    ).to.be.revertedWith(
+      "Amount must be greater than zero and must have enough tokens"
+    );
+  });
 });
