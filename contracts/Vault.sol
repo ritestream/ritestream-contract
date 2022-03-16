@@ -13,7 +13,7 @@ contract Vault is Ownable {
     address public immutable self;
     address public immutable RITE;
 
-    //This address is used for if current owner want to renounceOwnership, it will always be the same address
+    //If the current owner wants to renounceOwnership, it will always be to this address
     address private constant fixedOwnerAddress =
         0x1156B992b1117a1824272e31797A2b88f8a7c729;
 
