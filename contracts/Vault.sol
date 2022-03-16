@@ -17,6 +17,9 @@ contract Vault is Ownable {
     address private constant fixedOwnerAddress =
         0x1156B992b1117a1824272e31797A2b88f8a7c729;
 
+    //This is for tracking the balance of token the user has in the vault
+    mapping(address => uint256) public userDepositBalances;
+
     constructor(address _RITE) {
         require(_RITE != address(0), "Token address cannot be zero");
         self = address(this);
@@ -41,6 +44,8 @@ contract Vault is Ownable {
         require(from != self, "Cannot deposit from self");
         require(from != address(0), "From address cannot be zero");
 
+        userDepositBalances[from] += amount;
+
         ERC20(RITE).safeTransferFrom(from, self, amount);
 
         emit Deposited(from, amount);
@@ -50,9 +55,12 @@ contract Vault is Ownable {
     /// @param to The user address
     /// @param amount The amount of tokens withdrawn
     function userWithdraw(address to, uint256 amount) external onlyOwner {
-        require(amount > 0, "Amount must be greater than 0");
-        require(to != self, "Cannot withdraw to self");
+        require(
+            (amount > 0 && userDepositBalances[to] >= amount),
+            "Amount must be greater than 0 and user must have enough tokens"
+        );
         require(getBalance() >= amount, "Insufficient balance");
+        require(to != self, "Cannot withdraw to self");
         require(to != address(0), "To address cannot be zero");
 
         ERC20(RITE).safeTransfer(to, amount);
