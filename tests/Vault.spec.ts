@@ -136,4 +136,49 @@ describe("Vault Contract", () => {
     const balanceAfter = await token.balanceOf(deployerAddress);
     expect(balanceAfter).to.equal(balanceBefore.add(balanceOfVaultBefore));
   });
+
+  it("Should not allow RITE address to be zero", async () => {
+    const RITE = ethers.constants.AddressZero;
+    try {
+      await (await ethers.getContractFactory("Vault")).deploy(RITE);
+      throw new Error("Should not reach here");
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal("Token address cannot be zero");
+    }
+  });
+
+  it("Should not allow caller address to be zero", async () => {
+    const fromAddress = ethers.constants.AddressZero;
+    try {
+      await vault.userDeposit(fromAddress, "1000000000000000000000");
+      throw new Error("Should not reach here");
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal("From address cannot be zero");
+    }
+  });
+
+  it("Should only allow owner to call renounceOwnership and new owner always be the fixed address ", async () => {
+    await expect(token.connect(user).renounceOwnership()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
+
+    await token.renounceOwnership();
+    const newOwner = await token.owner();
+    expect(newOwner).to.equal("0x1156B992b1117a1824272e31797A2b88f8a7c729"); //this the fixed new owner address
+
+    await expect(token.renounceOwnership()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
+  });
+
+  it("Should not withdraw token more than you deposited", async () => {
+    const userAddress = await user.getAddress();
+    const balance = await vault.connect(user).getUserDepositBalance();
+
+    await expect(
+      vault.userWithdraw(userAddress, balance.add(1))
+    ).to.be.revertedWith(
+      "Amount must be greater than zero and must have enough tokens"
+    );
+  });
 });

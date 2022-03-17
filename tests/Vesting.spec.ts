@@ -220,6 +220,7 @@ describe("Sale Vesting", () => {
       );
     }
   });
+
   it("Should not allow RITE address to be zero", async () => {
     const RITE = ethers.constants.AddressZero;
     const latestBlockNumber = await ethers.provider.getBlockNumber();
@@ -233,5 +234,26 @@ describe("Sale Vesting", () => {
     } catch (error) {
       expect(getRevertMessage(error)).to.equal("Address cannot be zero");
     }
+  });
+
+  it("Should only allow owner to call renounceOwnership and new owner always be the fixed address ", async () => {
+    await expect(token.connect(user).renounceOwnership()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
+
+    await token.renounceOwnership();
+    const newOwner = await token.owner();
+    expect(newOwner).to.equal("0x1156B992b1117a1824272e31797A2b88f8a7c729"); //this the fixed new owner address
+
+    await expect(token.renounceOwnership()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
+  });
+
+  it("Should not allow more tokens than are in the contract", async () => {
+    const contractBalance = await token.balanceOf(vesting.address);
+    const totalClaimed = await vesting.totalClaimed();
+    const totalVestingAmount = await vesting.totalVestingAmount();
+    expect(contractBalance.gte(totalVestingAmount.sub(totalClaimed)));
   });
 });
