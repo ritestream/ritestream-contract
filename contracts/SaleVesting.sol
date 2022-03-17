@@ -142,9 +142,6 @@ contract SaleVesting is Ownable {
 
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
-        //Check there are tokens available
-        uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
-        require(contractTokenBalance >= totalVestingAmount - totalClaimed);
     }
 
     /**

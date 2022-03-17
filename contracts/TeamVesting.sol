@@ -146,9 +146,6 @@ contract TeamVesting is Ownable {
 
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
-        //Check there are tokens available
-        uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
-        require(contractTokenBalance >= totalVestingAmount - totalClaimed);
     }
 
     function claim() external {
@@ -205,6 +202,8 @@ contract TeamVesting is Ownable {
             amountToClaim =
                 vestingDetails[beneficiary].vestingAmount -
                 vestingDetails[beneficiary].claimedAmount;
+
+        totalClaimed += amountToClaim;
 
         vestingDetails[beneficiary].claimedAmount += amountToClaim;
         vestingDetails[beneficiary].lastClaimedTime = block.timestamp;
