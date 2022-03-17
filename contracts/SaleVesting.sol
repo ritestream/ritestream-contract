@@ -32,6 +32,12 @@ contract SaleVesting is Ownable {
     address public immutable self;
     address public immutable RITE;
     uint256 public TGEDate;
+    uint256 public totalClaimed;
+    uint256 public totalVestingAmount = 0;
+
+    //This address is used for if current owner want to renounceOwnership, it will always be the same address
+    address private constant fixedOwnerAddress =
+        0x1156B992b1117a1824272e31797A2b88f8a7c729;
 
     constructor(address _RITE, uint256 _TGEDate) {
         self = address(this);
@@ -112,8 +118,13 @@ contract SaleVesting is Ownable {
                 _vestingDetails[i].claimStartTime
             );
 
+            totalVestingAmount += _vestingDetails[i].vestingAmount;
+
             emit Vested(beneficiary, _vestingDetails[i].vestingAmount);
         }
+        //Check there are tokens available
+        uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
+        require(contractTokenBalance >= totalVestingAmount - totalClaimed);
     }
 
     /**
@@ -209,4 +220,9 @@ contract SaleVesting is Ownable {
     /// @param beneficiary a beneficiary address
     /// @param amount a claimed amount
     event Vested(address indexed beneficiary, uint256 amount);
+
+    /// @dev Override renounceOwnership to transfer ownership to a fixed address, make sure contract owner will never be address(0)
+    function renounceOwnership() public override onlyOwner {
+        _transferOwnership(fixedOwnerAddress);
+    }
 }
