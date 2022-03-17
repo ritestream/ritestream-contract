@@ -6,6 +6,7 @@ node_modules/
 .env.local
 .env.*.local
 .openzeppelin/unknown-1337.json
+.openzeppelin/unknown-31337.json
 
 # Log files
 npm-debug.log*
@@ -26,6 +27,7 @@ build/
 
 cache/
 artifacts/
+openzeppelin/
 
 # Solidty coverage report
 coverage.json

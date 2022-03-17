@@ -8,6 +8,7 @@ let vesting: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let user2: tsEthers.Signer;
+let user3: tsEthers.Signer;
 let startTime = 0;
 
 describe("Sale Vesting", () => {
@@ -15,21 +16,22 @@ describe("Sale Vesting", () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];
     user2 = (await ethers.getSigners())[2];
+    user3 = (await ethers.getSigners())[3];
     token = await (
       await ethers.getContractFactory("Token")
     ).deploy("Token", "TKN", 18);
-
-    vesting = await (
-      await ethers.getContractFactory("SaleVesting")
-    ).deploy(token.address, startTime);
-
-    await token.transfer(vesting.address, ethers.BigNumber.from("100000"));
 
     const latestBlockNumber = await ethers.provider.getBlockNumber();
 
     const latestBlock = await ethers.provider.getBlock(latestBlockNumber);
 
     startTime = latestBlock.timestamp + 1000;
+
+    vesting = await (
+      await ethers.getContractFactory("SaleVesting")
+    ).deploy(token.address, startTime);
+
+    await token.transfer(vesting.address, ethers.BigNumber.from("100000"));
   });
 
   it("Should get rite token address and balance of rite token after vesting contract deployed", async () => {
@@ -204,6 +206,34 @@ describe("Sale Vesting", () => {
     const userBalanceAfter = await token.balanceOf(user.getAddress());
 
     expect(userBalanceAfter).to.equal(ethers.BigNumber.from("10000"));
+  });
+
+  it("Should not allow TGE before deployment date", async () => {
+    try {
+      await (
+        await ethers.getContractFactory("SaleVesting")
+      ).deploy(token.address, 0);
+      throw new Error("Should not reach here");
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal(
+        "TGE cannot be before the deployment date"
+      );
+    }
+  });
+
+  it("Should not allow RITE address to be zero", async () => {
+    const RITE = ethers.constants.AddressZero;
+    const latestBlockNumber = await ethers.provider.getBlockNumber();
+    const latestBlock = await ethers.provider.getBlock(latestBlockNumber);
+    startTime = latestBlock.timestamp + 1000;
+    try {
+      await (
+        await ethers.getContractFactory("TeamVesting")
+      ).deploy(RITE, startTime);
+      throw new Error("Should not reach here");
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal("Address cannot be zero");
+    }
   });
 
   it("Should only allow owner to call renounceOwnership and new owner always be the fixed address ", async () => {

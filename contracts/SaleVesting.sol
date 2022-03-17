@@ -1,5 +1,4 @@
-pragma solidity ^0.8.11;
-pragma abicoder v2;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -34,15 +33,24 @@ contract SaleVesting is Ownable {
     uint256 public TGEDate;
     uint256 public totalClaimed;
     uint256 public totalVestingAmount = 0;
+    //Maximun number of vesting detail array.
+    uint256 internal immutable maxVestingDetailArray = 20;
+
+    event SetTGEDate(uint256 date);
 
     //This address is used for if current owner want to renounceOwnership, it will always be the same address
     address private constant fixedOwnerAddress =
         0x1156B992b1117a1824272e31797A2b88f8a7c729;
 
     constructor(address _RITE, uint256 _TGEDate) {
+        require(
+            _TGEDate >= block.timestamp,
+            "TGE cannot be before the deployment date"
+        );
+        require(_RITE != address(0), "Address cannot be zero");
+        TGEDate = _TGEDate;
         self = address(this);
         RITE = _RITE;
-        TGEDate = _TGEDate;
     }
 
     mapping(address => VestingDetail) internal vestingDetails;
@@ -51,6 +59,7 @@ contract SaleVesting is Ownable {
      * @dev Allow owner set user's vesting struct
      * @param _vestingDetails A list of beneficiary's vesting.
      */
+
     function setVesting(VestingDetail[] calldata _vestingDetails)
         external
         onlyOwner
@@ -63,7 +72,18 @@ contract SaleVesting is Ownable {
             "TGE already finished, no more vesting"
         );
 
+        //Check on the maximun size over which the for loop will run over.
+        require(count <= maxVestingDetailArray, "Too many vesting details");
+
         for (uint256 i = 0; i < count; i++) {
+            //Check there are tokens available
+            uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
+            require(
+                contractTokenBalance >=
+                    totalVestingAmount + _vestingDetails[i].vestingAmount,
+                "Not enough tokens"
+            );
+
             address beneficiary = _vestingDetails[i].beneficiary;
             require(
                 beneficiary != owner() && beneficiary != address(0),
@@ -153,7 +173,7 @@ contract SaleVesting is Ownable {
 
         // if initial claim is not done, claim initial amount + linear amount
         if (
-            vestingDetails[beneficiary].initialClaimed == false &&
+            !vestingDetails[beneficiary].initialClaimed &&
             vestingDetails[beneficiary].initialAmount > 0
         ) {
             amountToClaim += vestingDetails[beneficiary].initialAmount;
@@ -186,6 +206,7 @@ contract SaleVesting is Ownable {
 
         vestingDetails[beneficiary].lastClaimedTime = block.timestamp;
         vestingDetails[beneficiary].claimedAmount += amountToClaim;
+        totalClaimed += amountToClaim;
         ERC20(RITE).safeTransfer(beneficiary, amountToClaim);
 
         emit Claimed(beneficiary, amountToClaim);
@@ -209,6 +230,7 @@ contract SaleVesting is Ownable {
     function setTGEDate(uint256 _date) external onlyOwner {
         require(_date > block.timestamp, "TGE date is not valid");
         TGEDate = _date;
+        emit SetTGEDate(TGEDate);
     }
 
     /// @dev event when beneficiary claim tokens
