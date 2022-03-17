@@ -35,6 +35,8 @@ contract TeamVesting is Ownable {
     uint256 public startDate;
     uint256 public totalClaimed;
     uint256 public totalVestingAmount = 0;
+    //Maximun number of vesting detail array.
+    uint256 private constant maxVestingDetailArray = 20;
 
     //If the current owner wants to renounceOwnership, it will always be to this address
     address private constant fixedOwnerAddress =
@@ -67,6 +69,16 @@ contract TeamVesting is Ownable {
         require(count > 0, "No vesting details provided");
 
         for (uint256 i = 0; i < count; i++) {
+            //Check on the maximum size over which the for loop will run over.
+            require(i <= maxVestingDetailArray, "Vesting detail array is full");
+            //Check there are tokens available
+            uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
+            require(
+                contractTokenBalance >=
+                    totalVestingAmount + _vestingDetails[i].vestingAmount,
+                "Not enough tokens"
+            );
+
             address beneficiary = _vestingDetails[i].beneficiary;
             require(
                 beneficiary != address(0),
