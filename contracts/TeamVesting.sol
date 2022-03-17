@@ -68,9 +68,10 @@ contract TeamVesting is Ownable {
         //At least one vesting detail is required.
         require(count > 0, "No vesting details provided");
 
+        //Check on the maximum size over which the for loop will run over.
+        require(count <= maxVestingDetailArray, "Vesting detail array is full");
+
         for (uint256 i = 0; i < count; i++) {
-            //Check on the maximum size over which the for loop will run over.
-            require(i <= maxVestingDetailArray, "Vesting detail array is full");
             //Check there are tokens available
             uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
             require(

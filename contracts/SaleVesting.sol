@@ -72,9 +72,10 @@ contract SaleVesting is Ownable {
             "TGE already finished, no more vesting"
         );
 
+        //Check on the maximun size over which the for loop will run over.
+        require(count <= maxVestingDetailArray, "Too many vesting details");
+
         for (uint256 i = 0; i < count; i++) {
-            //Check on the maximun size over which the for loop will run over.
-            require(i <= maxVestingDetailArray, "Too many vesting details");
             //Check there are tokens available
             uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
             require(
