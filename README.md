@@ -1,8 +1,8 @@
 # Ritestream Contracts
 
-Owner `0xfa0b65413e3e81faf7321f85b2afdd0efff13ef5`
-```[BscScan.com 17/03/2022 05:09:53] I, hereby verify that I am the owner/creator of the address [0x0F5D54b27bDb556823F96f2536496550f8816dC5]```
-```0xca500a5b8f2f28f55da7381244e29afffae5fcb9d07f224bdd677b8959d1fcf0738573e0b981d55b8276338844d9d0b9d18a86f9136e28ba5fa8128ce2893c6700```
+Owner `0xfa0b65413e3e81faf7321f85b2afdd0efff13ef5`   
+```[BscScan.com 17/03/2022 05:09:53] I, hereby verify that I am the owner/creator of the address [0x0F5D54b27bDb556823F96f2536496550f8816dC5]```   
+```0xca500a5b8f2f28f55da7381244e29afffae5fcb9d07f224bdd677b8959d1fcf0738573e0b981d55b8276338844d9d0b9d18a86f9136e28ba5fa8128ce2893c6700```   
 
 ## Scripts
 
