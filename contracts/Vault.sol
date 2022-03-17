@@ -44,7 +44,6 @@ contract Vault is Ownable {
         require(from != address(0), "From address cannot be zero");
 
         userDepositBalances[from] += amount;
-
         ERC20(RITE).safeTransferFrom(from, self, amount);
 
         emit Deposited(from, amount);
@@ -62,6 +61,7 @@ contract Vault is Ownable {
         require(to != self, "Cannot withdraw to self");
         require(to != address(0), "To address cannot be zero");
 
+        userDepositBalances[to] -= amount;
         ERC20(RITE).safeTransfer(to, amount);
 
         emit Withdrawn(to, amount);

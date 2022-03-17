@@ -34,7 +34,7 @@ contract SaleVesting is Ownable {
     uint256 public totalClaimed;
     uint256 public totalVestingAmount = 0;
     //Maximun number of vesting detail array.
-    uint256 internal immutable maxVestingDetailArray = 20;
+    uint256 private constant maxVestingDetailArray = 20;
 
     event SetTGEDate(uint256 date);
 
