@@ -72,14 +72,6 @@ contract TeamVesting is Ownable {
         require(count <= maxVestingDetailArray, "Vesting detail array is full");
 
         for (uint256 i = 0; i < count; i++) {
-            //Check there are tokens available
-            uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
-            require(
-                contractTokenBalance >=
-                    totalVestingAmount + _vestingDetails[i].vestingAmount,
-                "Not enough tokens"
-            );
-
             address beneficiary = _vestingDetails[i].beneficiary;
             require(
                 beneficiary != address(0),
