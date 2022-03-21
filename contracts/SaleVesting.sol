@@ -76,14 +76,6 @@ contract SaleVesting is Ownable {
         require(count <= maxVestingDetailArray, "Too many vesting details");
 
         for (uint256 i = 0; i < count; i++) {
-            //Check there are tokens available
-            uint256 contractTokenBalance = ERC20(RITE).balanceOf(self);
-            require(
-                contractTokenBalance >=
-                    totalVestingAmount + _vestingDetails[i].vestingAmount,
-                "Not enough tokens"
-            );
-
             address beneficiary = _vestingDetails[i].beneficiary;
             require(
                 beneficiary != owner() && beneficiary != address(0),
