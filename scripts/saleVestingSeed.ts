@@ -2,44 +2,54 @@ import { ethers } from "ethers";
 
 const saleVestingSeed = [
   {
-    beneficiary: "0xA61D1f138df1E04DEe8E8A092ca20C206d88d063",
-    vestingAmount: ethers.BigNumber.from("2500000"),
-    duration: "31536000",
+    beneficiary: "0x472FD48b8F2CcDE44EbcF0Ae3bE72ff6370Cd14D", //AB Ventures
+    vestingAmount: ethers.BigNumber.from("483747"),
+    duration: 40867200,
     claimedAmount: 0,
     lastClaimedTime: 0,
-    initialAmount: ethers.BigNumber.from("62500"),
+    initialAmount: ethers.BigNumber.from("13916"),
     initialClaimed: false,
-    claimStartTime: 1645329862
+    claimStartTime: 1649322900
   },
   {
-    beneficiary: "0xB66e29158d18c34097a199624e5B126703B346C3",
-    vestingAmount: ethers.BigNumber.from("2500000"),
-    duration: 31536000,
+    beneficiary: "0xB66e29158d18c34097a199624e5B126703B346C3", //Croc Capital
+    vestingAmount: ethers.BigNumber.from("2177225"),
+    duration: 30326400,
     claimedAmount: 0,
     lastClaimedTime: 0,
-    initialAmount: ethers.BigNumber.from("62500"),
+    initialAmount: ethers.BigNumber.from("83510"),
     initialClaimed: false,
-    claimStartTime: 1645329862
+    claimStartTime: 1649322900
   },
   {
-    beneficiary: "0x51108169c4eCD8Ba6437838ebc307898525aAF66",
-    vestingAmount: ethers.BigNumber.from("2500000"),
-    duration: 31536000,
+    beneficiary: "0x9C05B49aa0a40C3F43DAa939E319234106229b80", //Joseph
+    vestingAmount: ethers.BigNumber.from("500000"),
+    duration: 40867200,
     claimedAmount: 0,
     lastClaimedTime: 0,
-    initialAmount: ethers.BigNumber.from("62500"),
+    initialAmount: ethers.BigNumber.from("26528"),
     initialClaimed: false,
-    claimStartTime: 1645329862
+    claimStartTime: 1649322900
   },
   {
-    beneficiary: "0x0196B25f7dCfe31DAD0f016357Bd0c7d5ff96b16",
-    vestingAmount: ethers.BigNumber.from("1750000"),
-    duration: 31536000,
+    beneficiary: "0x390DAAc16d5879f70A51674CDdAd5e8b20abB885", //GSG Digital Frontier
+    vestingAmount: ethers.BigNumber.from("6666667"),
+    duration: 30326400,
     claimedAmount: 0,
     lastClaimedTime: 0,
-    initialAmount: ethers.BigNumber.from("43750"),
+    initialAmount: ethers.BigNumber.from("576261"),
     initialClaimed: false,
-    claimStartTime: 1645329862
+    claimStartTime: 1649322900
+  },
+  {
+    beneficiary: "0xb47B752d27de51A9D84d0F0d1D74Bc099D7aAda9", //Anders Christiansen
+    vestingAmount: ethers.BigNumber.from("1300000"),
+    duration: 30326400,
+    claimedAmount: 0,
+    lastClaimedTime: 0,
+    initialAmount: ethers.BigNumber.from("112376"),
+    initialClaimed: false,
+    claimStartTime: 1649322900
   }
 ];
 
