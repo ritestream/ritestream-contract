@@ -6,7 +6,7 @@ export const contractNames = () => ["saleVesting"];
 
 const tgeDate = process.env.TGE_DATE; //Set the initial date of TGE. It can be changed once the contract is deployed.
 export const constructorArguments = () => [
-  contracts.binancetest.token,
+  contracts.binance.tokenUpgradeable,
   tgeDate
 ];
 
