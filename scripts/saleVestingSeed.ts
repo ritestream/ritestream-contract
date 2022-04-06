@@ -12,7 +12,7 @@ const saleVestingSeed = [
     claimStartTime: 1649322900
   },
   {
-    beneficiary: "0xB66e29158d18c34097a199624e5B126703B346C3", //Croc Capital
+    beneficiary: "0xaacAe045E4AB12e9f0C155973E60215dA5c085d0", //Croc Capital
     vestingAmount: ethers.BigNumber.from("2177225"),
     duration: 30326400,
     claimedAmount: 0,
