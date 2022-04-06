@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 const saleVestingSeed = [
   {
     beneficiary: "0x472FD48b8F2CcDE44EbcF0Ae3bE72ff6370Cd14D", //AB Ventures
-    vestingAmount: ethers.BigNumber.from("483747"),
+    vestingAmount: ethers.BigNumber.from("483334"),
     duration: 40867200,
     claimedAmount: 0,
     lastClaimedTime: 0,
@@ -13,7 +13,7 @@ const saleVestingSeed = [
   },
   {
     beneficiary: "0xaacAe045E4AB12e9f0C155973E60215dA5c085d0", //Croc Capital
-    vestingAmount: ethers.BigNumber.from("2177225"),
+    vestingAmount: ethers.BigNumber.from("2177083"),
     duration: 30326400,
     claimedAmount: 0,
     lastClaimedTime: 0,
