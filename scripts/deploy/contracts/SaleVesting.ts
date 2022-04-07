@@ -13,7 +13,7 @@ export const constructorArguments = () => [
 export const deploy = async (deployer, setAddresses) => {
   console.log("deploying SaleVesting");
   const saleVesting = await deployContract(
-    "SaleVesting",
+    "SaleVesting2",
     constructorArguments(),
     deployer,
     1

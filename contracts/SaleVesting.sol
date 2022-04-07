@@ -25,7 +25,7 @@ struct VestingDetail {
 }
 
 // Client's requirement not yet finalized, still waiting.
-contract SaleVesting is Ownable {
+contract SaleVesting2 is Ownable {
     using SafeERC20 for ERC20;
 
     address public immutable self;
