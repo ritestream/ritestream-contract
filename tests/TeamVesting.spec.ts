@@ -11,7 +11,7 @@ let employee2: tsEthers.Signer;
 let employee3: tsEthers.Signer;
 let startTime;
 
-describe("Team Vesting", () => {
+xdescribe("Team Vesting", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     employee1 = (await ethers.getSigners())[1];

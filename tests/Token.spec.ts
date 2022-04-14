@@ -9,7 +9,7 @@ let user: tsEthers.Signer;
 let otherUser: tsEthers.Signer;
 const vaultAddress = "0xa3A0Ce9592fE2bfA378Cc4dD5aB24Be150f00029"; //fake vault address for testing
 
-describe("ERC20 Token", () => {
+xdescribe("ERC20 Token", () => {
   before(async () => {
     [deployer, user, otherUser] = await ethers.getSigners();
     token = await (
