@@ -3,18 +3,25 @@ pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RitestreamNFT is ERC721Enumerable, Ownable {
     using Strings for uint256;
+    using Counters for Counters.Counter;
+
+    Counters.Counter private blueTokenCounter;
+    Counters.Counter private greenTokenCounter;
+    Counters.Counter private redTokenCounter;
 
     address public _self;
     string private baseURI;
     uint256 public blueTokenCount = 0;
     uint256 public redTokenCount = 4000;
     uint256 public greenTokenCount = 7000;
-    uint256 public blueMax = 3999;
-    uint256 public redMax = 6999;
-    uint256 public greenMax = 7999;
+    uint256 public blueMax = 4000;
+    uint256 public redMax = 7000;
+    uint256 public greenMax = 8000;
     bool public isSaleActive;
 
     constructor(string memory name_, string memory symbol_)
@@ -26,30 +33,6 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     //MODIFIERS
     modifier saleActive() {
         require(isSaleActive, "Sale is not active");
-        _;
-    }
-
-    modifier canMintBlueTokens() {
-        require(
-            blueTokenCount <= blueMax,
-            "Not enough blue tokens remaining to mint"
-        );
-        _;
-    }
-
-    modifier canMintRedTokens() {
-        require(
-            redTokenCount <= redMax,
-            "Not enough red tokens remaining to mint"
-        );
-        _;
-    }
-
-    modifier canMintGreenTokens() {
-        require(
-            greenTokenCount <= greenMax,
-            "Not enough green tokens remaining to mint"
-        );
         _;
     }
 
@@ -97,42 +80,34 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     }
 
     //FUNCTION FOR MINTING
-    function mintBlueTokens(address userAddress)
-        external
-        payable
-        canMintBlueTokens
-        saleActive
-        onlyOwner
-    {
-        for (uint256 i = 0; i < blueTokenCount; i++) {
-            _safeMint(userAddress, nextBlueTokenId());
-            blueTokenCount += 1;
-        }
+    function mintBlueTokens(address userAddress) external saleActive onlyOwner {
+        require(
+            blueTokenCount <= blueMax,
+            "Not enough blue tokens remaining to mint"
+        );
+        _safeMint(userAddress, nextBlueTokenId());
+        blueTokenCount += 1;
     }
 
     function mintGreenTokens(address userAddress)
         external
-        payable
-        canMintGreenTokens
         saleActive
         onlyOwner
     {
-        for (uint256 i = 0; i < greenTokenCount; i++) {
-            _safeMint(userAddress, nextGreenTokenId());
-            greenTokenCount += 1;
-        }
+        require(
+            greenTokenCount <= greenMax,
+            "Not enough green tokens remaining to mint"
+        );
+        _safeMint(userAddress, nextGreenTokenId());
+        greenTokenCount += 1;
     }
 
-    function mintRedTokens(address userAddress)
-        external
-        payable
-        canMintRedTokens
-        saleActive
-        onlyOwner
-    {
-        for (uint256 i = 0; i < redTokenCount; i++) {
-            _safeMint(userAddress, nextRedTokenId());
-            redTokenCount += 1;
-        }
+    function mintRedTokens(address userAddress) external saleActive onlyOwner {
+        require(
+            redTokenCount <= redMax,
+            "Not enough red tokens remaining to mint"
+        );
+        _safeMint(userAddress, nextRedTokenId());
+        redTokenCount += 1;
     }
 }
