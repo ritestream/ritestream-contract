@@ -3,6 +3,7 @@ import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
 import { getRevertMessage } from "./utils";
 import { isAddress } from "ethers/lib/utils";
+import { Token } from "typescript";
 
 let token: tsEthers.Contract;
 let deployer: tsEthers.Signer;
@@ -83,7 +84,7 @@ describe("Ritestream NFT", () => {
     expect(balance).to.equal(3);
 
     //Check token ID has increased:
-    expect(token.nextBlueTokenId === 4002);
+    expect(token.nextRedTokenId === 4002);
   });
 
   it("Should mint green tokens", async () => {
@@ -92,6 +93,20 @@ describe("Ritestream NFT", () => {
     expect(balance).to.equal(4);
 
     //Check token ID has increased:
-    expect(token.nextBlueTokenId === 7002);
+    expect(token.nextGreenTokenId === 7002);
+  });
+
+  //Time out in for loop if trying to test other colors, but logic is same
+  it("Should not mint more than 1000 green tokens", async () => {
+    for (let i = 0; i < 999; i++) {
+      await token.mintGreenTokens(userAddress);
+    }
+    try {
+      await token.mintGreenTokens(userAddress);
+    } catch (error) {
+      expect(getRevertMessage(error)).to.equal(
+        "Not enough green passes remaining to mint"
+      );
+    }
   });
 });

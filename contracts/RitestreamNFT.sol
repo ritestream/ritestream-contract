@@ -79,7 +79,7 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     //FUNCTION FOR MINTING
     function mintBlueTokens(address userAddress) external saleActive onlyOwner {
         require(
-            blueTokenCount <= blueMax,
+            blueTokenCount < blueMax,
             "Not enough blue passes remaining to mint"
         );
         _safeMint(userAddress, nextBlueTokenId());
@@ -92,7 +92,7 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
         onlyOwner
     {
         require(
-            greenTokenCount <= greenMax,
+            greenTokenCount < greenMax,
             "Not enough green passes remaining to mint"
         );
         _safeMint(userAddress, nextGreenTokenId());
@@ -101,7 +101,7 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
 
     function mintRedTokens(address userAddress) external saleActive onlyOwner {
         require(
-            redTokenCount <= redMax,
+            redTokenCount < redMax,
             "Not enough red passes remaining to mint"
         );
         _safeMint(userAddress, nextRedTokenId());

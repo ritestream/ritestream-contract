@@ -11,7 +11,7 @@ let user2: tsEthers.Signer;
 let user3: tsEthers.Signer;
 let startTime = 0;
 
-describe("Sale Vesting", () => {
+xdescribe("Sale Vesting", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];

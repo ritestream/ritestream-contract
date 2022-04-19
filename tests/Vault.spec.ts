@@ -8,7 +8,7 @@ let vault: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 
-describe("Vault Contract", () => {
+xdescribe("Vault Contract", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];
