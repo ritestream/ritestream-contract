@@ -3,25 +3,23 @@ pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RitestreamNFT is ERC721Enumerable, Ownable {
-    using Strings for uint256;
-    using Counters for Counters.Counter;
-
-    Counters.Counter private blueTokenCounter;
-    Counters.Counter private greenTokenCounter;
-    Counters.Counter private redTokenCounter;
-
-    address public _self;
+    address public immutable _self;
     string private baseURI;
+
+    //Start blue pass IDs from 0
     uint256 public blueTokenCount = 0;
+
+    //Start red pass IDs from 4000
     uint256 public redTokenCount = 4000;
+
+    //Start green pass IDs from 7000
     uint256 public greenTokenCount = 7000;
-    uint256 public blueMax = 4000;
-    uint256 public redMax = 7000;
-    uint256 public greenMax = 8000;
+
+    uint256 private immutable blueMax = 4000;
+    uint256 private immutable redMax = 7000;
+    uint256 private immutable greenMax = 8000;
     bool public isSaleActive;
 
     constructor(string memory name_, string memory symbol_)
@@ -50,8 +48,7 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     {
         require(_exists(tokenId), "Nonexistent token");
 
-        return
-            string(abi.encodePacked(baseURI, "/", tokenId.toString(), ".json"));
+        return string(abi.encodePacked(baseURI, "/", tokenId, ".json"));
     }
 
     //ONLY OWNER FUNCTIONS
@@ -64,17 +61,17 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     }
 
     //SUPPORTING FUNCTIONS
-    function nextBlueTokenId() public view returns (uint256) {
+    function nextBlueTokenId() internal view returns (uint256) {
         uint256 blueTokenId = blueTokenCount + 1;
         return blueTokenId;
     }
 
-    function nextRedTokenId() public view returns (uint256) {
+    function nextRedTokenId() internal view returns (uint256) {
         uint256 redTokenId = redTokenCount + 1;
         return redTokenId;
     }
 
-    function nextGreenTokenId() public view returns (uint256) {
+    function nextGreenTokenId() internal view returns (uint256) {
         uint256 greenTokenId = greenTokenCount + 1;
         return greenTokenId;
     }
@@ -83,7 +80,7 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     function mintBlueTokens(address userAddress) external saleActive onlyOwner {
         require(
             blueTokenCount <= blueMax,
-            "Not enough blue tokens remaining to mint"
+            "Not enough blue passes remaining to mint"
         );
         _safeMint(userAddress, nextBlueTokenId());
         blueTokenCount += 1;
@@ -96,7 +93,7 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     {
         require(
             greenTokenCount <= greenMax,
-            "Not enough green tokens remaining to mint"
+            "Not enough green passes remaining to mint"
         );
         _safeMint(userAddress, nextGreenTokenId());
         greenTokenCount += 1;
@@ -105,7 +102,7 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     function mintRedTokens(address userAddress) external saleActive onlyOwner {
         require(
             redTokenCount <= redMax,
-            "Not enough red tokens remaining to mint"
+            "Not enough red passes remaining to mint"
         );
         _safeMint(userAddress, nextRedTokenId());
         redTokenCount += 1;
