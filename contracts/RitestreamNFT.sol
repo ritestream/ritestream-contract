@@ -8,6 +8,10 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     address public immutable _self;
     string private baseURI;
 
+    //This address is used for if current owner want to renounceOwnership, it will always be the same address
+    address private constant fixedOwnerAddress =
+        0x1156B992b1117a1824272e31797A2b88f8a7c729;
+
     //Start blue pass IDs from 0
     uint256 public blueTokenCount = 0;
 
@@ -106,5 +110,10 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
         );
         _safeMint(userAddress, nextRedTokenId());
         redTokenCount += 1;
+    }
+
+    /// @dev Override renounceOwnership to transfer ownership to a fixed address, make sure contract owner will never be address(0)
+    function renounceOwnership() public override onlyOwner {
+        _transferOwnership(fixedOwnerAddress);
     }
 }
