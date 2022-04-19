@@ -1,10 +1,9 @@
 ﻿import { ethers } from "hardhat";
 import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
-import { getRevertMessage } from "./utils";
 import { isAddress } from "ethers/lib/utils";
 
-let token: tsEthers.Contract;
+let nftPass: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let userAddress: string;
@@ -14,111 +13,89 @@ describe("Ritestream NFT", () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];
 
-    token = await (
+    nftPass = await (
       await ethers.getContractFactory("RitestreamNFT")
     ).deploy("Ritestream NFT", "RIT");
 
-    await token.deployed();
+    await nftPass.deployed();
 
     userAddress = await user.getAddress();
   });
 
   it("Should have sale not active when contract is deployed", async () => {
     //Check contract has deployed
-    const address = token.address;
+    const address = nftPass.address;
     const verifyAddress = isAddress(address);
     expect(verifyAddress === true);
 
     //Check sale active status
-    expect(token.isSaleActive === false);
+    expect(nftPass.isSaleActive === false);
   });
 
   it("Should return sale active status", async () => {
-    await token.toggleSaleStatus();
-    expect(token.isSaleActive === true);
+    await nftPass.toggleSaleStatus();
+    expect(nftPass.isSaleActive === true);
   });
 
   it("Should only allow owner to toggle if sale is active", async () => {
-    try {
-      await token.toggleSaleStatus();
-    } catch (error) {
-      expect(getRevertMessage(error)).to.equal(
-        "Ownable: caller is not the owner"
-      );
-    }
+    await expect(nftPass.connect(user).toggleSaleStatus()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
   });
 
   it("Should only mint NFTs if the sale is active", async () => {
-    await token.toggleSaleStatus();
-    try {
-      await token.mintBlueTokens(userAddress);
-    } catch (error) {
-      expect(getRevertMessage(error)).to.equal("Sale is not active");
-    }
+    await nftPass.toggleSaleStatus();
+    await expect(nftPass.mintBluePass(userAddress)).to.be.revertedWith(
+      "Sale is not active"
+    );
   });
 
-  it("Should only allow owner to mint a token", async () => {
-    try {
-      await token.connect(user).mintGreenTokens(userAddress);
-      throw new Error("Should not reach here");
-    } catch (error) {
-      expect(getRevertMessage(error)).to.equal(
-        "Ownable: caller is not the owner"
-      );
-    }
+  it("Should only allow owner to mint a pass", async () => {
+    await nftPass.toggleSaleStatus();
+    await expect(
+      nftPass.connect(user).mintGreenPass(userAddress)
+    ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
-  it("Should mint blue tokens", async () => {
-    await token.mintBlueTokens(userAddress);
-    const balance = await token.balanceOf(userAddress);
+  it("Should mint blue passes", async () => {
+    nftPass.connect(deployer);
+    await nftPass.mintBluePass(userAddress);
+    const balance = await nftPass.balanceOf(userAddress);
+    expect(balance).to.equal(1);
+  });
+
+  it("Should mint red passes", async () => {
+    await nftPass.mintRedPass(userAddress);
+    const balance = await nftPass.balanceOf(userAddress);
     expect(balance).to.equal(2);
-
-    //Check token ID has increased:
-    expect(token.nextBlueTokenId === 2);
   });
 
-  it("Should mint red tokens", async () => {
-    await token.mintRedTokens(userAddress);
-    const balance = await token.balanceOf(userAddress);
+  it("Should mint green passes", async () => {
+    await nftPass.mintGreenPass(userAddress);
+    const balance = await nftPass.balanceOf(userAddress);
     expect(balance).to.equal(3);
-
-    //Check token ID has increased:
-    expect(token.nextRedTokenId === 4002);
-  });
-
-  it("Should mint green tokens", async () => {
-    await token.mintGreenTokens(userAddress);
-    const balance = await token.balanceOf(userAddress);
-    expect(balance).to.equal(4);
-
-    //Check token ID has increased:
-    expect(token.nextGreenTokenId === 7002);
   });
 
   //Time out in for loop if trying to test other colors, but logic is same
-  it("Should not mint more than 1000 green tokens", async () => {
+  it("Should not mint more than 1000 green passes", async () => {
     for (let i = 0; i < 999; i++) {
-      await token.mintGreenTokens(userAddress);
+      await nftPass.mintGreenPass(userAddress);
     }
-    try {
-      await token.mintGreenTokens(userAddress);
-    } catch (error) {
-      expect(getRevertMessage(error)).to.equal(
-        "Not enough green passes remaining to mint"
-      );
-    }
+    await expect(nftPass.mintGreenPass(userAddress)).to.be.revertedWith(
+      "Not enough green passes remaining to mint"
+    );
   });
 
   it("Should only allow owner to call renounceOwnership and new owner always be the fixed address ", async () => {
-    expect(token.connect(user).renounceOwnership()).to.be.revertedWith(
+    await expect(nftPass.connect(user).renounceOwnership()).to.be.revertedWith(
       "Ownable: caller is not the owner"
     );
 
-    await token.renounceOwnership();
-    const newOwner = await token.owner();
+    await nftPass.renounceOwnership();
+    const newOwner = await nftPass.owner();
     expect(newOwner).to.equal("0x1156B992b1117a1824272e31797A2b88f8a7c729"); //this the fixed new owner address
 
-    await expect(token.renounceOwnership()).to.be.revertedWith(
+    await expect(nftPass.renounceOwnership()).to.be.revertedWith(
       "Ownable: caller is not the owner"
     );
   });

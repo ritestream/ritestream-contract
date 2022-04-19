@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract RitestreamNFT is ERC721Enumerable, Ownable {
-    address public immutable _self;
+    address private immutable _self;
     string private baseURI;
 
     //This address is used for if current owner want to renounceOwnership, it will always be the same address
@@ -13,13 +13,13 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
         0x1156B992b1117a1824272e31797A2b88f8a7c729;
 
     //Start blue pass IDs from 0
-    uint256 public blueTokenCount = 0;
+    uint256 public bluePassesCount = 0;
 
     //Start red pass IDs from 4000
-    uint256 public redTokenCount = 4000;
+    uint256 public redPassesCount = 4000;
 
     //Start green pass IDs from 7000
-    uint256 public greenTokenCount = 7000;
+    uint256 public greenPassesCount = 7000;
 
     uint256 private immutable blueMax = 4000;
     uint256 private immutable redMax = 7000;
@@ -65,51 +65,47 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
     }
 
     //SUPPORTING FUNCTIONS
-    function nextBlueTokenId() internal view returns (uint256) {
-        uint256 blueTokenId = blueTokenCount + 1;
-        return blueTokenId;
+    function nextBluePassId() internal view returns (uint256) {
+        uint256 bluePassId = bluePassesCount + 1;
+        return bluePassId;
     }
 
-    function nextRedTokenId() internal view returns (uint256) {
-        uint256 redTokenId = redTokenCount + 1;
-        return redTokenId;
+    function nextRedPassId() internal view returns (uint256) {
+        uint256 redPassId = redPassesCount + 1;
+        return redPassId;
     }
 
-    function nextGreenTokenId() internal view returns (uint256) {
-        uint256 greenTokenId = greenTokenCount + 1;
-        return greenTokenId;
+    function nextGreenPassId() internal view returns (uint256) {
+        uint256 greenPassId = greenPassesCount + 1;
+        return greenPassId;
     }
 
     //FUNCTION FOR MINTING
-    function mintBlueTokens(address userAddress) external saleActive onlyOwner {
+    function mintBluePass(address userAddress) external saleActive onlyOwner {
         require(
-            blueTokenCount < blueMax,
+            bluePassesCount < blueMax,
             "Not enough blue passes remaining to mint"
         );
-        _safeMint(userAddress, nextBlueTokenId());
-        blueTokenCount += 1;
+        _safeMint(userAddress, nextBluePassId());
+        bluePassesCount += 1;
     }
 
-    function mintGreenTokens(address userAddress)
-        external
-        saleActive
-        onlyOwner
-    {
+    function mintGreenPass(address userAddress) external saleActive onlyOwner {
         require(
-            greenTokenCount < greenMax,
+            greenPassesCount < greenMax,
             "Not enough green passes remaining to mint"
         );
-        _safeMint(userAddress, nextGreenTokenId());
-        greenTokenCount += 1;
+        _safeMint(userAddress, nextGreenPassId());
+        greenPassesCount += 1;
     }
 
-    function mintRedTokens(address userAddress) external saleActive onlyOwner {
+    function mintRedPass(address userAddress) external saleActive onlyOwner {
         require(
-            redTokenCount < redMax,
+            redPassesCount < redMax,
             "Not enough red passes remaining to mint"
         );
-        _safeMint(userAddress, nextRedTokenId());
-        redTokenCount += 1;
+        _safeMint(userAddress, nextRedPassId());
+        redPassesCount += 1;
     }
 
     /// @dev Override renounceOwnership to transfer ownership to a fixed address, make sure contract owner will never be address(0)
