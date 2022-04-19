@@ -1,38 +1,50 @@
-pragma solidity ^0.8.3;
-pragma abicoder v2;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+
+enum Color {
+    Blue,
+    Red,
+    Green
+}
 
 contract RitestreamNFT is ERC721Enumerable, Ownable {
     address private immutable _self;
     string private baseURI;
 
-    //This address is used for if current owner want to renounceOwnership, it will always be the same address
+    // This address is used for if current owner want to renounceOwnership, it will always be the same address
     address private constant fixedOwnerAddress =
         0x1156B992b1117a1824272e31797A2b88f8a7c729;
 
-    //Start blue pass IDs from 0
-    uint256 public bluePassesCount = 0;
+    /** @dev Mapping from color to maximum per color */
+    mapping(Color => uint16) public max;
 
-    //Start red pass IDs from 4000
-    uint256 public redPassesCount = 4000;
+    /** @dev Mapping from color to quantity minted per color */
+    mapping(Color => uint256) public passes;
 
-    //Start green pass IDs from 7000
-    uint256 public greenPassesCount = 7000;
-
-    uint256 private immutable blueMax = 4000;
-    uint256 private immutable redMax = 7000;
-    uint256 private immutable greenMax = 8000;
     bool public isSaleActive;
 
     constructor(string memory name_, string memory symbol_)
         ERC721(name_, symbol_)
     {
         _self = address(this);
+        max[Color.Blue] = 4000;
+        max[Color.Red] = 7000;
+        max[Color.Green] = 8000;
+
+        //Start blue IDs at 0
+        passes[Color.Blue] = 0;
+
+        //Start red IDs at 4000
+        passes[Color.Red] = 4000;
+
+        //Start greed IDs at 7000
+        passes[Color.Green] = 7000;
     }
 
-    //MODIFIERS
+    // MODIFIERS
     modifier saleActive() {
         require(isSaleActive, "Sale is not active");
         _;
@@ -55,7 +67,7 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
         return string(abi.encodePacked(baseURI, "/", tokenId, ".json"));
     }
 
-    //ONLY OWNER FUNCTIONS
+    // ONLY OWNER FUNCTIONS
     function setBaseURI(string memory _baseURI) external onlyOwner {
         baseURI = _baseURI;
     }
@@ -64,48 +76,20 @@ contract RitestreamNFT is ERC721Enumerable, Ownable {
         isSaleActive = !isSaleActive;
     }
 
-    //SUPPORTING FUNCTIONS
-    function nextBluePassId() internal view returns (uint256) {
-        uint256 bluePassId = bluePassesCount + 1;
-        return bluePassId;
+    // SUPPORTING FUNCTIONS
+    function nextPassId(Color id) internal view returns (uint256) {
+        return passes[id] + 1;
     }
 
-    function nextRedPassId() internal view returns (uint256) {
-        uint256 redPassId = redPassesCount + 1;
-        return redPassId;
-    }
-
-    function nextGreenPassId() internal view returns (uint256) {
-        uint256 greenPassId = greenPassesCount + 1;
-        return greenPassId;
-    }
-
-    //FUNCTION FOR MINTING
-    function mintBluePass(address userAddress) external saleActive onlyOwner {
-        require(
-            bluePassesCount < blueMax,
-            "Not enough blue passes remaining to mint"
-        );
-        _safeMint(userAddress, nextBluePassId());
-        bluePassesCount += 1;
-    }
-
-    function mintGreenPass(address userAddress) external saleActive onlyOwner {
-        require(
-            greenPassesCount < greenMax,
-            "Not enough green passes remaining to mint"
-        );
-        _safeMint(userAddress, nextGreenPassId());
-        greenPassesCount += 1;
-    }
-
-    function mintRedPass(address userAddress) external saleActive onlyOwner {
-        require(
-            redPassesCount < redMax,
-            "Not enough red passes remaining to mint"
-        );
-        _safeMint(userAddress, nextRedPassId());
-        redPassesCount += 1;
+    // FUNCTION FOR MINTING
+    function mintPass(address userAddress, Color id)
+        external
+        saleActive
+        onlyOwner
+    {
+        require(passes[id] < max[id], "Not enough passes remaining to mint");
+        _safeMint(userAddress, nextPassId(id));
+        passes[id]++;
     }
 
     /// @dev Override renounceOwnership to transfer ownership to a fixed address, make sure contract owner will never be address(0)

@@ -8,6 +8,12 @@ let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let userAddress: string;
 
+const Colors = {
+  Blue: 0,
+  Red: 1,
+  Green: 2
+};
+
 describe("Ritestream NFT", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
@@ -45,7 +51,7 @@ describe("Ritestream NFT", () => {
 
   it("Should only mint NFTs if the sale is active", async () => {
     await nftPass.toggleSaleStatus();
-    await expect(nftPass.mintBluePass(userAddress)).to.be.revertedWith(
+    await expect(nftPass.mintPass(userAddress, Colors.Blue)).to.be.revertedWith(
       "Sale is not active"
     );
   });
@@ -53,37 +59,49 @@ describe("Ritestream NFT", () => {
   it("Should only allow owner to mint a pass", async () => {
     await nftPass.toggleSaleStatus();
     await expect(
-      nftPass.connect(user).mintGreenPass(userAddress)
+      nftPass.connect(user).mintPass(userAddress, Colors.Blue)
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it("Should mint blue passes", async () => {
     nftPass.connect(deployer);
-    await nftPass.mintBluePass(userAddress);
+    await nftPass.mintPass(userAddress, Colors.Blue);
     const balance = await nftPass.balanceOf(userAddress);
     expect(balance).to.equal(1);
+
+    //Check pass ID
+    const currentPassId = await nftPass.passes(Colors.Blue);
+    expect(currentPassId === 1);
   });
 
   it("Should mint red passes", async () => {
-    await nftPass.mintRedPass(userAddress);
+    await nftPass.mintPass(userAddress, Colors.Red);
     const balance = await nftPass.balanceOf(userAddress);
     expect(balance).to.equal(2);
+
+    //Check pass ID
+    const currentPassId = await nftPass.passes(Colors.Red);
+    expect(currentPassId === 4001);
   });
 
   it("Should mint green passes", async () => {
-    await nftPass.mintGreenPass(userAddress);
+    await nftPass.mintPass(userAddress, Colors.Green);
     const balance = await nftPass.balanceOf(userAddress);
     expect(balance).to.equal(3);
+
+    //Check pass ID
+    const currentPassId = await nftPass.passes(Colors.Green);
+    expect(currentPassId === 7001);
   });
 
   //Time out in for loop if trying to test other colors, but logic is same
   it("Should not mint more than 1000 green passes", async () => {
     for (let i = 0; i < 999; i++) {
-      await nftPass.mintGreenPass(userAddress);
+      await nftPass.mintPass(userAddress, Colors.Green);
     }
-    await expect(nftPass.mintGreenPass(userAddress)).to.be.revertedWith(
-      "Not enough green passes remaining to mint"
-    );
+    await expect(
+      nftPass.mintPass(userAddress, Colors.Green)
+    ).to.be.revertedWith("Not enough passes remaining to mint");
   });
 
   it("Should only allow owner to call renounceOwnership and new owner always be the fixed address ", async () => {
