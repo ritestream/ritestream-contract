@@ -3,7 +3,6 @@ import { ethers as tsEthers } from "ethers";
 import { expect } from "chai";
 import { getRevertMessage } from "./utils";
 import { isAddress } from "ethers/lib/utils";
-import { Token } from "typescript";
 
 let token: tsEthers.Contract;
 let deployer: tsEthers.Signer;
