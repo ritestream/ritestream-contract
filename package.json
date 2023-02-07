@@ -1,7 +1,8 @@
 {
-  "name": "solidity",
+  "name": "ritestream",
   "version": "0.0.1",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "prepare": "husky install",
     "hh:compile": "npx hardhat compile && npx hardhat size-contracts",
