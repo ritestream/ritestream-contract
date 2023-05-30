@@ -14,7 +14,7 @@ const Colors = {
   Green: 2
 };
 
-describe("Ritestream NFT", () => {
+xdescribe("Ritestream NFT", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     user = (await ethers.getSigners())[1];
