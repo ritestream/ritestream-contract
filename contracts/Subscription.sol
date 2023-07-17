@@ -31,6 +31,7 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     //If the current owner wants to renounceOwnership, it will always be to this address
     address private constant FIXED_OWNER_ADDRESS =
         0x1156B992b1117a1824272e31797A2b88f8a7c729;
+    uint256 private constant duration = 30 days;
 
     mapping(address => SubscriptionPlan) public subscriptionPlans;
 
@@ -105,14 +106,14 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             msg.sender,
             amount,
             block.timestamp,
-            block.timestamp + 30 days
+            block.timestamp + duration
         );
         ERC20(RITE).safeTransferFrom(msg.sender, self, amount);
 
         emit Subscribed(
             msg.sender,
             block.timestamp,
-            block.timestamp + 30 days,
+            block.timestamp + duration,
             amount
         );
     }
@@ -146,14 +147,14 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         );
 
         subscriptionPlan.amountPaid += amount;
-        subscriptionPlan.endDate = block.timestamp + 30 days;
+        subscriptionPlan.endDate = block.timestamp + duration;
 
         ERC20(RITE).safeTransferFrom(msg.sender, self, amount);
 
         emit Subscribed(
             msg.sender,
             block.timestamp,
-            block.timestamp + 30 days,
+            block.timestamp + duration,
             amount
         );
     }
