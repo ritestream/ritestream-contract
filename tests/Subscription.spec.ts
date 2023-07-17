@@ -1,7 +1,6 @@
 import hre, { ethers } from "hardhat";
 import { BigNumber, BigNumberish, ethers as tsEthers } from "ethers";
 import { expect } from "chai";
-import { getRevertMessage } from "./utils";
 import { deployProxy } from "../scripts/deploy/utils";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
@@ -73,7 +72,6 @@ describe("Subscription", () => {
         .connect(user)
         .renewSubscription(ethers.utils.parseEther("100"), signature, nonce)
     ).to.be.revertedWith("No subscription plan found");
-    nonce = nonce + 1;
   });
 
   it("Should allow user to subscribe", async () => {
@@ -125,12 +123,33 @@ describe("Subscription", () => {
     expect(await token.balanceOf(subscription.address)).to.equal("0");
   });
 
+  it("Should not allow to reuse the same signature", async () => {
+    const latestBlockNumber = await ethers.provider.getBlockNumber();
+    const latestBlock = await ethers.provider.getBlock(latestBlockNumber);
+    await hre.network.provider.request({
+      method: "evm_setNextBlockTimestamp",
+      params: [latestBlock.timestamp + 3456000]
+    });
+
+    const signature = await signMintMessage(
+      await user.getAddress(),
+      ethers.utils.parseEther("100"),
+      operator,
+      0
+    );
+    await expect(
+      subscription
+        .connect(user)
+        .renewSubscription(ethers.utils.parseEther("100"), signature, 0)
+    ).to.be.revertedWith("Nonce already used");
+  });
+
   it("Should allow user to update subscription plan", async () => {
     const latestBlockNumber = await ethers.provider.getBlockNumber();
     const latestBlock = await ethers.provider.getBlock(latestBlockNumber);
     await hre.network.provider.request({
       method: "evm_setNextBlockTimestamp",
-      params: [latestBlock.timestamp + 2592000]
+      params: [latestBlock.timestamp + 3456000]
     });
 
     const signature = await signMintMessage(

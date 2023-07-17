@@ -34,6 +34,7 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     uint256 private constant duration = 30 days;
 
     mapping(address => SubscriptionPlan) public subscriptionPlans;
+    mapping(uint256 => bool) private nonces;
 
     uint256[49] __gap;
 
@@ -76,6 +77,7 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ) external {
         require(amount > 0, "Amount must be greater than 0");
         require(msg.sender != self, "Cannot deposit from self");
+        require(nonces[nonce] == false, "Nonce already used");
         SubscriptionPlan storage existSubscription = subscriptionPlans[
             msg.sender
         ];
@@ -103,6 +105,7 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             block.timestamp,
             block.timestamp + duration
         );
+        nonces[nonce] = true;
         ERC20(RITE).safeTransferFrom(msg.sender, self, amount);
 
         emit Subscribed(
@@ -123,7 +126,7 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ) external {
         require(amount > 0, "Amount must be greater than 0");
         require(msg.sender != self, "Cannot deposit from self");
-
+        require(nonces[nonce] == false, "Nonce already used");
         bytes32 messagehash = keccak256(
             abi.encodePacked(msg.sender, amount, nonce)
         );
@@ -144,6 +147,7 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         subscriptionPlan.amountPaid += amount;
         subscriptionPlan.endDate = block.timestamp + duration;
 
+        nonces[nonce] = true;
         ERC20(RITE).safeTransferFrom(msg.sender, self, amount);
 
         emit Subscribed(
