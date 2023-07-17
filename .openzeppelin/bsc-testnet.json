@@ -1,0 +1,659 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xAb4D97842Aeb5BD5d8B22947B4cBbF0B88b3d5f3",
+      "txHash": "0x686570fee60d51a2deae951a452b1196e90106f1250856734abae953c62270f9",
+      "kind": "uups"
+    },
+    {
+      "address": "0x219633CA1F481d701fED3E79E2b95fa2f148CC58",
+      "txHash": "0x1df78e11c10049d568dd101ebc50724bc105ba5b4919ed85f1499560ffe5501b",
+      "kind": "uups"
+    },
+    {
+      "address": "0x87B5756640E04C1a6999c69993D62D8b3436A4cF",
+      "txHash": "0x407dac755ec64daa8341b9f8d5010b255ef06808f70ec942dc3535cde609af05",
+      "kind": "uups"
+    },
+    {
+      "address": "0x1FBEDe219347bF8283823E2262121a49Bc822d9B",
+      "txHash": "0x15dc4c5e9bc4749896463732bd95f974b7fc61a96852edb0c81def38596e8600",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "ad7d5efe9316d6a503141de30a444e1d000aabbed640acd6e61c5012fa906405": {
+      "address": "0x8c40612F17e770845F8B70200F0Ef447DF812071",
+      "txHash": "0x97509ccf0835914c82b86c901d5c5c11d6d514ee6507407324c19b024c19426e",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "self",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:28"
+          },
+          {
+            "label": "RITE",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:29"
+          },
+          {
+            "label": "_operator",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:30"
+          },
+          {
+            "label": "subscriptionPlans",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_mapping(t_address,t_struct(SubscriptionPlan)2867_storage)",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:35"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(SubscriptionPlan)2867_storage)": {
+            "label": "mapping(address => struct SubscriptionPlan)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(SubscriptionPlan)2867_storage": {
+            "label": "struct SubscriptionPlan",
+            "members": [
+              {
+                "label": "subscriber",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amountPaid",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "startDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "endDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "4ba96e555f1195ddc35c29754f58b40c962a8a6dbce1ef9f06f2de31b24733dd": {
+      "address": "0x542ca4a48239CAD6A6f60A4a611A54A27A59CFb3",
+      "txHash": "0x0c75eef401601a502bfd2dda6a2fb0a6df37e909d2fdd3ba48c20164015cf91b",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "self",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:28"
+          },
+          {
+            "label": "RITE",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:29"
+          },
+          {
+            "label": "_operator",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:30"
+          },
+          {
+            "label": "subscriptionPlans",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_mapping(t_address,t_struct(SubscriptionPlan)2867_storage)",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:35"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(SubscriptionPlan)2867_storage)": {
+            "label": "mapping(address => struct SubscriptionPlan)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(SubscriptionPlan)2867_storage": {
+            "label": "struct SubscriptionPlan",
+            "members": [
+              {
+                "label": "subscriber",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amountPaid",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "startDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "endDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "4bd453163fa30fdd112b8d52c183c7f27da96b5337467e139c482507e35b6af9": {
+      "address": "0x5A651285B8D3550D5572D4d6B1249d0915B3b114",
+      "txHash": "0xbea8416e20fdf421def3de3cffd8326b8b0a6f32e4152ccb801f7ae21622b7fa",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "self",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:28"
+          },
+          {
+            "label": "RITE",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:29"
+          },
+          {
+            "label": "_operator",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:30"
+          },
+          {
+            "label": "subscriptionPlans",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_mapping(t_address,t_struct(SubscriptionPlan)2867_storage)",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:35"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(SubscriptionPlan)2867_storage)": {
+            "label": "mapping(address => struct SubscriptionPlan)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(SubscriptionPlan)2867_storage": {
+            "label": "struct SubscriptionPlan",
+            "members": [
+              {
+                "label": "subscriber",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amountPaid",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "startDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "endDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "86f1da95c331e172567fa78d276c2031bc98a5134dc904e62480be94f3e6fe4f": {
+      "address": "0xB1257A851b02c3681D62bd72E7b3fE6Db8e3A661",
+      "txHash": "0x09d32fc87f0a77b3c04594d03b56188c7c0965c132482871d95bdd48716af631",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "self",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:28"
+          },
+          {
+            "label": "RITE",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:29"
+          },
+          {
+            "label": "_operator",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_address",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:30"
+          },
+          {
+            "label": "subscriptionPlans",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_mapping(t_address,t_struct(SubscriptionPlan)2867_storage)",
+            "contract": "Subscription",
+            "src": "contracts/Subscription.sol:35"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(SubscriptionPlan)2867_storage)": {
+            "label": "mapping(address => struct SubscriptionPlan)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(SubscriptionPlan)2867_storage": {
+            "label": "struct SubscriptionPlan",
+            "members": [
+              {
+                "label": "subscriber",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amountPaid",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "startDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "endDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}

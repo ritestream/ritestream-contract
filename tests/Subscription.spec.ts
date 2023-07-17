@@ -10,6 +10,7 @@ let subscription: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Signer;
 let operator: SignerWithAddress;
+let nonce = 0;
 
 describe("Subscription", () => {
   before(async () => {
@@ -43,9 +44,7 @@ describe("Subscription", () => {
     const balance = await token.balanceOf(subscription.address);
 
     expect(balance).to.equal(ethers.BigNumber.from("0"));
-    expect(await subscription._operator()).to.equal(
-      await deployer.getAddress()
-    );
+    expect(await subscription.operator()).to.equal(await deployer.getAddress());
 
     expect(await token.balanceOf(await user.getAddress())).to.equal(
       ethers.utils.parseEther("1000")
@@ -59,35 +58,38 @@ describe("Subscription", () => {
 
     await subscription.setOperator(await operator.getAddress());
 
-    expect(await subscription._operator()).to.equal(
-      await operator.getAddress()
-    );
+    expect(await subscription.operator()).to.equal(await operator.getAddress());
   });
 
   it("Should not allow to update plan if no subscription found", async () => {
     const signature = await signMintMessage(
       await user.getAddress(),
       ethers.utils.parseEther("100"),
-      operator
+      operator,
+      nonce
     );
     await expect(
       subscription
         .connect(user)
-        .updateSubscriptionPlan(ethers.utils.parseEther("100"), signature)
+        .renewSubscription(ethers.utils.parseEther("100"), signature, nonce)
     ).to.be.revertedWith("No subscription plan found");
+    nonce = nonce + 1;
   });
 
   it("Should allow user to subscribe", async () => {
     const signature = await signMintMessage(
       await user.getAddress(),
       ethers.utils.parseEther("100"),
-      operator
+      operator,
+      nonce
     );
     await subscription
       .connect(user)
-      .subscribe(ethers.utils.parseEther("100"), signature);
+      .subscribe(ethers.utils.parseEther("100"), signature, nonce);
 
-    const userSubscription = await subscription.connect(user).getSubscription();
+    const userSubscription = await subscription
+      .connect(user)
+      .getSubscription(await user.getAddress());
     const latestBlockNumber = await ethers.provider.getBlockNumber();
     const latestBlock = await ethers.provider.getBlock(latestBlockNumber);
     expect(userSubscription[0]).to.equal(await user.getAddress());
@@ -95,6 +97,22 @@ describe("Subscription", () => {
     expect(
       Number(ethers.utils.formatUnits(userSubscription[3], 0))
     ).to.be.greaterThan(Number(latestBlock.timestamp));
+    nonce = nonce + 1;
+  });
+
+  it("Should not overwrite subscription on calling function again with different amount.", async () => {
+    const signature = await signMintMessage(
+      await user.getAddress(),
+      ethers.utils.parseEther("50"),
+      operator,
+      nonce
+    );
+
+    await expect(
+      subscription
+        .connect(user)
+        .subscribe(ethers.utils.parseEther("50"), signature, nonce)
+    ).to.be.revertedWith("Already subscribed");
   });
 
   it("Should only allow owner to withdraw", async () => {
@@ -118,13 +136,16 @@ describe("Subscription", () => {
     const signature = await signMintMessage(
       await user.getAddress(),
       ethers.utils.parseEther("200"),
-      operator
+      operator,
+      nonce
     );
     await subscription
       .connect(user)
-      .updateSubscriptionPlan(ethers.utils.parseEther("200"), signature);
+      .renewSubscription(ethers.utils.parseEther("200"), signature, nonce);
 
-    const userSubscription = await subscription.connect(user).getSubscription();
+    const userSubscription = await subscription
+      .connect(user)
+      .getSubscription(await user.getAddress());
     const nextLatestBlockNumber = await ethers.provider.getBlockNumber();
     const nextLatestBlock = await ethers.provider.getBlock(
       nextLatestBlockNumber
@@ -134,17 +155,19 @@ describe("Subscription", () => {
     expect(
       Number(ethers.utils.formatUnits(userSubscription[3], 0))
     ).to.be.greaterThan(Number(nextLatestBlock.timestamp));
+    nonce = nonce + 1;
   });
 });
 
 async function signMintMessage(
   address: string,
   amount: BigNumber,
-  signer: SignerWithAddress
+  signer: SignerWithAddress,
+  nonce: number
 ): Promise<Signature> {
   const message = ethers.utils.solidityKeccak256(
-    ["address", "uint256"],
-    [address, amount]
+    ["address", "uint256", "uint256"],
+    [address, amount, nonce]
   );
   return await signMessage(message, signer);
 }

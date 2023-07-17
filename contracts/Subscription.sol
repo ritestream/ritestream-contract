@@ -27,12 +27,19 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     address private self;
     address public RITE;
-    address public _operator;
+    address public operator;
     //If the current owner wants to renounceOwnership, it will always be to this address
-    address private constant fixedOwnerAddress =
+    address private constant FIXED_OWNER_ADDRESS =
         0x1156B992b1117a1824272e31797A2b88f8a7c729;
 
     mapping(address => SubscriptionPlan) public subscriptionPlans;
+
+    uint256[49] __gap;
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     function initialize(address _RITE) public initializer {
         require(_RITE != address(0), "Token address cannot be zero");
@@ -40,7 +47,7 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         __UUPSUpgradeable_init();
         self = address(this);
         RITE = _RITE;
-        _operator = msg.sender;
+        operator = msg.sender;
     }
 
     /// @dev Event emitted when a user withdraws tokens
@@ -59,21 +66,40 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint256 amount
     );
 
+    /// @dev Event emitted when the operator is changed
+    /// @param operator The new operator address
+    event OperatorChanged(address indexed operator);
+
     /// @dev Function for subscribing to a plan
     /// @param amount The amount of tokens deposited
-    /// @param _signature The signature of the operator
-    function subscribe(uint256 amount, Signature calldata _signature) external {
+    /// @param signature The signature of the operator
+    function subscribe(
+        uint256 amount,
+        Signature calldata signature,
+        uint256 nonce
+    ) external {
         require(amount > 0, "Amount must be greater than 0");
         require(msg.sender != self, "Cannot deposit from self");
-        require(msg.sender != address(0), "From address cannot be zero");
-
-        bytes32 messagehash = keccak256(abi.encodePacked(msg.sender, amount));
+        SubscriptionPlan storage existSubscription = subscriptionPlans[
+            msg.sender
+        ];
         require(
-            recoverSigner(messagehash, _signature) == _operator,
+            existSubscription.subscriber != msg.sender,
+            "Already subscribed"
+        );
+        require(
+            existSubscription.endDate < block.timestamp,
+            "Already subscribed"
+        );
+        require(existSubscription.amountPaid == 0, "Already subscribed");
+
+        bytes32 messagehash = keccak256(
+            abi.encodePacked(msg.sender, amount, nonce)
+        );
+        require(
+            recoverSigner(messagehash, signature) == operator,
             "Invalid signature"
         );
-
-        ERC20(RITE).safeTransferFrom(msg.sender, self, amount);
 
         subscriptionPlans[msg.sender] = SubscriptionPlan(
             msg.sender,
@@ -81,6 +107,8 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             block.timestamp,
             block.timestamp + 30 days
         );
+        ERC20(RITE).safeTransferFrom(msg.sender, self, amount);
+
         emit Subscribed(
             msg.sender,
             block.timestamp,
@@ -91,22 +119,22 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /// @dev Function for update subscription plan
     /// @param amount The amount of tokens deposited
-    /// @param _signature The signature of the operator
-    function updateSubscriptionPlan(
+    /// @param signature The signature of the operator
+    function renewSubscription(
         uint256 amount,
-        Signature calldata _signature
+        Signature calldata signature,
+        uint256 nonce
     ) external {
         require(amount > 0, "Amount must be greater than 0");
         require(msg.sender != self, "Cannot deposit from self");
-        require(msg.sender != address(0), "From address cannot be zero");
 
-        bytes32 messagehash = keccak256(abi.encodePacked(msg.sender, amount));
+        bytes32 messagehash = keccak256(
+            abi.encodePacked(msg.sender, amount, nonce)
+        );
         require(
-            recoverSigner(messagehash, _signature) == _operator,
+            recoverSigner(messagehash, signature) == operator,
             "Invalid signature"
         );
-
-        ERC20(RITE).safeTransferFrom(msg.sender, self, amount);
 
         SubscriptionPlan storage subscriptionPlan = subscriptionPlans[
             msg.sender
@@ -118,7 +146,9 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         );
 
         subscriptionPlan.amountPaid += amount;
-        subscriptionPlan.endDate += 30 days;
+        subscriptionPlan.endDate = block.timestamp + 30 days;
+
+        ERC20(RITE).safeTransferFrom(msg.sender, self, amount);
 
         emit Subscribed(
             msg.sender,
@@ -129,8 +159,10 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /// @dev Function for getting subscription plan
-    function getSubscription() external view returns (SubscriptionPlan memory) {
-        return subscriptionPlans[msg.sender];
+    function getSubscription(
+        address _subscribed
+    ) external view returns (SubscriptionPlan memory) {
+        return subscriptionPlans[_subscribed];
     }
 
     /// @dev Withdraw all tokens from the subscription contract
@@ -142,13 +174,15 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /// @dev Function for setup operator
-    function setOperator(address operator) external onlyOwner {
-        _operator = operator;
+    function setOperator(address newOperator) external onlyOwner {
+        require(newOperator != address(0), "Operator address cannot be zero");
+        operator = newOperator;
+        emit OperatorChanged(newOperator);
     }
 
     /// @dev Override renounceOwnership to transfer ownership to a fixed address, make sure contract owner will never be address(0)
     function renounceOwnership() public override onlyOwner {
-        _transferOwnership(fixedOwnerAddress);
+        _transferOwnership(FIXED_OWNER_ADDRESS);
     }
 
     function recoverSigner(

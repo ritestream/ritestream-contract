@@ -3,6 +3,7 @@ import * as Token from "./Token";
 import * as TokenUpgradeable from "./TokenUpgradeable";
 import * as Vault from "./Vault";
 import * as SaleVesting from "./SaleVesting";
+import * as Subscription from "./Subscription";
 
 export interface DeploymentModule {
   contractNames: (...params: any) => string[];
@@ -19,7 +20,8 @@ const modules: DeploymentModule[] = [
   Token,
   TokenUpgradeable,
   Vault,
-  SaleVesting
+  SaleVesting,
+  Subscription
 ];
 
 export default modules;
