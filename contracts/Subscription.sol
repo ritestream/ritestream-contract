@@ -37,11 +37,6 @@ contract Subscription is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     uint256[49] __gap;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
     function initialize(address _RITE) public initializer {
         require(_RITE != address(0), "Token address cannot be zero");
         __Ownable_init();
