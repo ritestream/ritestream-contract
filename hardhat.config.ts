@@ -25,7 +25,13 @@ export default {
     hardhat: {
       allowUnlimitedContractSize: false
     },
-    binancetest: {
+    opBnb: {
+      url: "https://opbnb-testnet-rpc.bnbchain.org",
+      chainId: 5611,
+      gasPrice: 20000000000,
+      accounts: [process.env.PRIVATE_KEY]
+    },
+    binanceTest: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
       gasPrice: 20000000000,
@@ -37,14 +43,6 @@ export default {
       gasPrice: 6000000000,
       accounts: [process.env.PRIVATE_KEY]
     },
-    kovan: {
-      url: process.env.KOVAN_URL || defaultRpcUrl,
-      accounts: [process.env.PRIVATE_KEY || defaultKey]
-    },
-    rinkeby: {
-      url: process.env.RINKEBY_URL || defaultRpcUrl,
-      accounts: [process.env.PRIVATE_KEY || defaultKey]
-    },
     mainnet: {
       url: process.env.MAINNET_URL || defaultRpcUrl,
       accounts: [process.env.PRIVATE_KEY || defaultKey]
@@ -52,7 +50,21 @@ export default {
   },
   etherscan: {
     // Obtain etherscan API key at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN_KEY
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_KEY,
+      binance: process.env.ETHERSCAN_KEY,
+      binanceTest: process.env.ETHERSCAN_KEY
+    },
+    customChains: [
+      {
+        network: "opBnb",
+        chainId: 5611,
+        urls: {
+          apiURL: "https://api-testnet.bscscan.com/api",
+          browserURL: "https://goerli.etherscan.io"
+        }
+      }
+    ]
   },
   solidity: {
     compilers: [

@@ -9,7 +9,7 @@ export const deploy = async (deployer, setAddresses) => {
   console.log("deploying subscription");
   const subscription = await deployProxy(
     "Subscription",
-    ["0xf62F3aF0Ee56E00655a99a952Ea507e58CDf1766"], // update live token address
+    ["0xA73f64370f052B1a6B36f87e837bd22dA17E8381"], // update live token address
     deployer,
     1
   );

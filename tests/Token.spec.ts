@@ -13,8 +13,8 @@ describe("ERC20 Token", () => {
   before(async () => {
     [deployer, user, otherUser] = await ethers.getSigners();
     token = await (
-      await ethers.getContractFactory("Token")
-    ).deploy("Token", "TKN", 18);
+      await ethers.getContractFactory("Rite")
+    ).deploy("Rite", "RITE", 18);
 
     // Send ETH to user from signer.
     await deployer.sendTransaction({

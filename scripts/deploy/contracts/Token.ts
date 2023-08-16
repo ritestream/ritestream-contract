@@ -11,7 +11,7 @@ export const constructorArguments = () => [
 export const deploy = async (deployer, setAddresses) => {
   console.log("deploying Token");
   const token = await deployContract(
-    "Token",
+    "Rite",
     constructorArguments(),
     deployer,
     1

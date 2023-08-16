@@ -4,7 +4,7 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Token is IERC20, ERC20, Ownable {
+contract Rite is IERC20, ERC20, Ownable {
     uint8 private immutable _decimals;
     mapping(address => uint256) internal userNonces;
 
@@ -80,11 +80,9 @@ contract Token is IERC20, ERC20, Ownable {
             );
     }
 
-    function getEthSignedMessageHash(bytes32 messageHash)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function getEthSignedMessageHash(
+        bytes32 messageHash
+    ) internal pure returns (bytes32) {
         /*
         Signature is produced by signing a keccak256 hash with the following format:
         "\x19Ethereum Signed Message\n" + len(msg) + msg
@@ -98,11 +96,10 @@ contract Token is IERC20, ERC20, Ownable {
             );
     }
 
-    function recoverSigner(bytes32 message, bytes memory signature)
-        internal
-        pure
-        returns (address)
-    {
+    function recoverSigner(
+        bytes32 message,
+        bytes memory signature
+    ) internal pure returns (address) {
         uint8 v;
         bytes32 r;
         bytes32 s;
@@ -112,15 +109,9 @@ contract Token is IERC20, ERC20, Ownable {
         return ecrecover(message, v, r, s);
     }
 
-    function splitSignature(bytes memory signature)
-        internal
-        pure
-        returns (
-            uint8,
-            bytes32,
-            bytes32
-        )
-    {
+    function splitSignature(
+        bytes memory signature
+    ) internal pure returns (uint8, bytes32, bytes32) {
         require(signature.length == 65);
 
         bytes32 r;

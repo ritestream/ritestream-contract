@@ -5,11 +5,16 @@
     "tokenUpgradeable": "0x0F5D54b27bDb556823F96f2536496550f8816dC5",
     "vault": "0xa3A0Ce9592fE2bfA378Cc4dD5aB24Be150f00029",
     "token": "0x0F5D54b27bDb556823F96f2536496550f8816dC5",
-    "saleVesting": "0xe8B3D2CC6C02EAFEfAFb4f2a194002fcCA6DAc6E"
+    "saleVesting": "0xe8B3D2CC6C02EAFEfAFb4f2a194002fcCA6DAc6E",
+    "subscription": "0xe47d85141afefeb40c2b3ab090Ab78249565DA9C"
   },
   "binancetest": {
     "token": "0xf62F3aF0Ee56E00655a99a952Ea507e58CDf1766",
     "saleVesting": "0x620f118883aA34658929ca63d22da0628ef9fE6d",
-    "subscription": "0xc2c8719a9D684049F8e8ef1eaD09AB912A1665cf"
+    "subscription": "0x759aD3a8F735300e81C207D326ba0B425d1ED496"
+  },
+  "opbnb": {
+    "token": "0xA73f64370f052B1a6B36f87e837bd22dA17E8381",
+    "subscription": "0x788a13A86DCD1D4f72D6E5531B4d9Cc3826E8b72"
   }
 }
