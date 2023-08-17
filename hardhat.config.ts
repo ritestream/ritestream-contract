@@ -34,7 +34,7 @@ export default {
     binanceTest: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
-      gasPrice: 20000000000,
+      gasPrice: 6000000000,
       accounts: [process.env.PRIVATE_KEY]
     },
     binance: {
@@ -50,21 +50,17 @@ export default {
   },
   etherscan: {
     // Obtain etherscan API key at https://etherscan.io/
-    apiKey: {
-      mainnet: process.env.ETHERSCAN_KEY,
-      binance: process.env.ETHERSCAN_KEY,
-      binanceTest: process.env.ETHERSCAN_KEY
-    },
-    customChains: [
-      {
-        network: "opBnb",
-        chainId: 5611,
-        urls: {
-          apiURL: "https://api-testnet.bscscan.com/api",
-          browserURL: "https://goerli.etherscan.io"
-        }
-      }
-    ]
+    apiKey: process.env.ETHERSCAN_KEY
+    // customChains: [
+    //   {
+    //     network: "opBnb",
+    //     chainId: 5611,
+    //     urls: {
+    //       apiURL: "https://api-testnet.bscscan.com/api",
+    //       browserURL: "https://goerli.etherscan.io"
+    //     }
+    //   }
+    // ]
   },
   solidity: {
     compilers: [
