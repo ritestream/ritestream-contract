@@ -79,10 +79,6 @@ contract Staking is Ownable {
         string memory _month
     ) external onlyOperator {
         require(_amount > 0, "Staking: amount is zero");
-        require(
-            totalStaked + _amount <= MAX_CAP,
-            "Staking: total staked exceeds max cap"
-        );
 
         Stake[] memory userStakes = stakes[_address];
         for (uint i = 0; i < userStakes.length; i++) {
@@ -93,11 +89,22 @@ contract Staking is Ownable {
             );
         }
         totalStaked += _amount;
+        uint256 stakeAmount;
+        if (totalStaked + _amount <= MAX_CAP) {
+            stakeAmount = _amount;
+        } else {
+            stakeAmount = MAX_CAP - totalStaked;
+        }
         stakes[_address].push(
-            Stake(_amount, block.timestamp, block.timestamp + duration, _month)
+            Stake(
+                stakeAmount,
+                block.timestamp,
+                block.timestamp + duration,
+                _month
+            )
         );
 
-        emit Staked(_address, _amount, block.timestamp, _month);
+        emit Staked(_address, stakeAmount, block.timestamp, _month);
     }
 
     /// @dev Allow user to unstake their RITE after staking duration
@@ -117,7 +124,6 @@ contract Staking is Ownable {
             "Staking: insufficient balance"
         );
 
-        totalStaked -= amount;
         stakes[msg.sender][_index] = stakes[msg.sender][
             stakes[msg.sender].length - 1
         ];
