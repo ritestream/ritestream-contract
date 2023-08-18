@@ -124,11 +124,6 @@ contract Staking is Ownable {
             "Staking: insufficient balance"
         );
 
-        stakes[msg.sender][_index] = stakes[msg.sender][
-            stakes[msg.sender].length - 1
-        ];
-        stakes[msg.sender].pop();
-
         ERC20(RITE).safeTransfer(msg.sender, amount + reward);
         emit Unstaked(
             msg.sender,
@@ -136,6 +131,11 @@ contract Staking is Ownable {
             block.timestamp,
             stakes[msg.sender][_index].month
         );
+
+        stakes[msg.sender][_index] = stakes[msg.sender][
+            stakes[msg.sender].length - 1
+        ];
+        stakes[msg.sender].pop();
     }
 
     /// @dev Allow user to see their stakes
