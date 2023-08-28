@@ -39,6 +39,7 @@ contract Staking is Ownable {
     }
 
     mapping(address => Stake[]) public stakes;
+    mapping(address => mapping(string => bool)) public isStaked;
 
     // Event for staking
     event Staked(
@@ -81,14 +82,10 @@ contract Staking is Ownable {
         require(_address != address(0), "Staking: address is zero");
         require(totalStaked < MAX_CAP, "Staking: max cap reached");
 
-        Stake[] memory userStakes = stakes[_address];
-        for (uint i = 0; i < userStakes.length; i++) {
-            require(
-                keccak256(bytes(userStakes[i].month)) !=
-                    keccak256(bytes(_month)),
-                "Staking: already staked for this month"
-            );
-        }
+        require(
+            isStaked[_address][_month] == false,
+            "Staking: already staked for this month"
+        );
         uint256 stakeAmount = totalStaked + _amount <= MAX_CAP
             ? _amount
             : MAX_CAP - totalStaked;
@@ -103,6 +100,7 @@ contract Staking is Ownable {
             )
         );
 
+        isStaked[_address][_month] = true;
         emit Staked(_address, stakeAmount, block.timestamp, _month);
     }
 
