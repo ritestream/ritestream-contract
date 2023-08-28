@@ -4,7 +4,6 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./Token.sol";
 
 struct Stake {
     uint256 amount;
@@ -18,7 +17,7 @@ contract Staking is Ownable {
 
     address public immutable self;
     address public immutable RITE;
-    uint256 private MAX_CAP = 5000000000000000000000000; // 5M RITE
+    uint256 private constant MAX_CAP = 5000000000000000000000000; // 5M RITE
     uint256 public totalStaked;
     address public operator;
     uint256 private constant duration = 365 days; // staking duration is 12 months
@@ -79,6 +78,8 @@ contract Staking is Ownable {
         string memory _month
     ) external onlyOperator {
         require(_amount > 0, "Staking: amount is zero");
+        require(_address != address(0), "Staking: address is zero");
+        require(totalStaked < MAX_CAP, "Staking: max cap reached");
 
         Stake[] memory userStakes = stakes[_address];
         for (uint i = 0; i < userStakes.length; i++) {
@@ -88,13 +89,11 @@ contract Staking is Ownable {
                 "Staking: already staked for this month"
             );
         }
-        totalStaked += _amount;
-        uint256 stakeAmount;
-        if (totalStaked + _amount <= MAX_CAP) {
-            stakeAmount = _amount;
-        } else {
-            stakeAmount = MAX_CAP - totalStaked;
-        }
+        uint256 stakeAmount = totalStaked + _amount <= MAX_CAP
+            ? _amount
+            : MAX_CAP - totalStaked;
+
+        totalStaked += stakeAmount;
         stakes[_address].push(
             Stake(
                 stakeAmount,
@@ -124,6 +123,11 @@ contract Staking is Ownable {
             "Staking: insufficient balance"
         );
 
+        stakes[msg.sender][_index] = stakes[msg.sender][
+            stakes[msg.sender].length - 1
+        ];
+        stakes[msg.sender].pop();
+
         ERC20(RITE).safeTransfer(msg.sender, amount + reward);
         emit Unstaked(
             msg.sender,
@@ -131,11 +135,6 @@ contract Staking is Ownable {
             block.timestamp,
             stakes[msg.sender][_index].month
         );
-
-        stakes[msg.sender][_index] = stakes[msg.sender][
-            stakes[msg.sender].length - 1
-        ];
-        stakes[msg.sender].pop();
     }
 
     /// @dev Allow user to see their stakes
