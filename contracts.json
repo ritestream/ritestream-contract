@@ -6,7 +6,8 @@
     "vault": "0xa3A0Ce9592fE2bfA378Cc4dD5aB24Be150f00029",
     "token": "0x0F5D54b27bDb556823F96f2536496550f8816dC5",
     "saleVesting": "0xe8B3D2CC6C02EAFEfAFb4f2a194002fcCA6DAc6E",
-    "subscription": "0xe47d85141afefeb40c2b3ab090Ab78249565DA9C"
+    "subscription": "0xe47d85141afefeb40c2b3ab090Ab78249565DA9C",
+    "staking": "0xF0Fb449d6fcB4461925ae9D76Ae91E716dAda9d5"
   },
   "binancetest": {
     "token": "0xf62F3aF0Ee56E00655a99a952Ea507e58CDf1766",

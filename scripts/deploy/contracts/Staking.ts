@@ -9,7 +9,7 @@ export const deploy = async (deployer, setAddresses) => {
   console.log("deploying Staking");
   const staking = await deployContract(
     "Staking",
-    ["0xf62F3aF0Ee56E00655a99a952Ea507e58CDf1766"], // update live token address
+    ["0x0F5D54b27bDb556823F96f2536496550f8816dC5"], // update live token address
     deployer,
     1
   );
