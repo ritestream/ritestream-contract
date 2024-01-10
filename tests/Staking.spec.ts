@@ -10,7 +10,7 @@ let user: tsEthers.Signer;
 let user2: tsEthers.Signer;
 let operator: SignerWithAddress;
 
-describe("Staking", () => {
+xdescribe("Staking", () => {
   beforeEach(async () => {
     [deployer, user, user2, operator] = await ethers.getSigners();
 

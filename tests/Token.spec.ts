@@ -21,27 +21,28 @@ describe("ERC20 Token", () => {
       to: await user.getAddress(),
       value: ethers.utils.parseEther("1000")
     });
+
+    // Send token to other User from signer
+    await token
+      .connect(deployer)
+      .transfer(await otherUser.getAddress(), ethers.utils.parseEther("100"));
+
+    await token
+      .connect(deployer)
+      .transfer(await user.getAddress(), ethers.utils.parseEther("100"));
   });
 
   it("Should return the correct decimal count", async () => {
     expect(await token.decimals()).to.equal(18);
   });
 
-  it("should be able to burn the tokens if the msg.sender is owner", async () => {
-    const amount = ethers.BigNumber.from("10");
-    const address = await deployer.getAddress();
-    await token.burn(amount);
-    const balance = await token.balanceOf(address);
-    expect(balance).to.equal(
-      ethers.BigNumber.from("999999999999999999999999990")
-    );
-  });
+  it("should be able to burn the tokens", async () => {
+    const balance = await token.balanceOf(await otherUser.getAddress());
+    expect(balance).to.equal(ethers.utils.parseEther("100"));
 
-  it("Should revert if the msg.sender is not owner while burning the tokens", async () => {
-    const amount = ethers.BigNumber.from("10");
-    await expect(token.connect(user).burn(amount)).to.be.revertedWith(
-      getRevertMessage("Ownable: caller is not the owner")
-    );
+    await token.connect(otherUser).burn(ethers.utils.parseEther("100"));
+    const afterBalance = await token.balanceOf(await otherUser.getAddress());
+    expect(afterBalance).to.equal(ethers.BigNumber.from("0"));
   });
 
   it("should approve tokens from holder to spender account through signature", async () => {

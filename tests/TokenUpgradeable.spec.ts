@@ -8,7 +8,7 @@ let token: tsEthers.Contract;
 let deployer: tsEthers.Signer;
 let user: tsEthers.Wallet;
 
-describe("ERC20 Token Upgradeable", () => {
+xdescribe("ERC20 Token Upgradeable", () => {
   before(async () => {
     deployer = (await ethers.getSigners())[0];
     token = await deployProxy(

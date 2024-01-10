@@ -22,10 +22,10 @@ contract Rite is IERC20, ERC20, Ownable {
     }
 
     /**
-     * @dev Allow owner to burn the token they own
+     * @dev Allow token holders to burn the token they own
      * @param amount  The amount of the token user want to burn.
      */
-    function burn(uint256 amount) external onlyOwner {
+    function burn(uint256 amount) external {
         _burn(msg.sender, amount);
     }
 
