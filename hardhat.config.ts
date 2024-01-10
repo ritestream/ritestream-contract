@@ -38,7 +38,7 @@ export default {
       accounts: [process.env.PRIVATE_KEY]
     },
     binance: {
-      url: "https://bsc-dataseed.binance.org/",
+      url: "https://bsc-dataseed2.binance.org",
       chainId: 56,
       gasPrice: 6000000000,
       accounts: [process.env.PRIVATE_KEY]

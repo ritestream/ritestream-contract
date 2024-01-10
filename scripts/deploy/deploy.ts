@@ -23,7 +23,7 @@ export const deploy = async () => {
   const deployer = await getSignerForDeployer();
   console.log("using deployer index ", getSignerIndex());
   console.log(`deployer is ${await deployer.getAddress()}`);
-  const gasPrice = await deployer.provider.getGasPrice();
+  const gasPrice = await deployer.provider?.getGasPrice();
   console.log(
     `gas price is `,
     `${ethers.utils.formatUnits(gasPrice, "gwei")} gwei`

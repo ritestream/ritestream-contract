@@ -10,7 +10,7 @@ contract Rite is IERC20, ERC20, Ownable {
 
     //This address is used for if current owner want to renounceOwnership, it will always be the same address
     address private constant fixedOwnerAddress =
-        0x1156B992b1117a1824272e31797A2b88f8a7c729;
+        0x52e4B21e34b55e48BBa964df5B5E616f8628D19b;
 
     constructor(
         string memory name_,
